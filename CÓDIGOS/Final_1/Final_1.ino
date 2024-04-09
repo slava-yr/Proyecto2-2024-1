@@ -1,17 +1,24 @@
+/* Código principal del medidor de gases para Proyecto Electrónico 2*/
   #include <Wire.h>
   #include <Adafruit_GFX.h>
   #include <Adafruit_SSD1306.h>
   #include <avr/sleep.h>
   #include <avr/power.h>
+  
+  /*Parámetros para el OLED*/
   #define ANCHO 128
   #define ALTO 64
   #define OLED_RESET 4
   Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
+
+  /*Declaración de pines*/
   const int Pin_boton = 7;
   const int Pin_BUZZ= 5;
   const int Pin_Sensores= 6;
   const int Pin_OLED= 13;
   const int Pin_inter= 2;
+
+  /*Declaración de variables*/
   volatile bool interruptFlag = false;
   float t;
   float t_co;
@@ -20,9 +27,11 @@
   int contador_timer2 = 0;
   int inicio_0=1;
   int contador_timer2_inicio=0;
-  // Setup de los pines a utilizar
+
+  /* Setup*/
   void setup() {
-    Serial.begin(9600);
+    Serial.begin(9600); 
+    /*Declaración de pines*/
     pinMode(Pin_boton,OUTPUT); 
     digitalWrite(Pin_boton,HIGH);
     pinMode(Pin_inter,INPUT); 
@@ -33,6 +42,7 @@
     pinMode(Pin_OLED,OUTPUT);
     digitalWrite(Pin_OLED,HIGH);
     delay(100);
+
     Wire.begin();
     oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     attachInterrupt(digitalPinToInterrupt(Pin_inter),handleInterrupt, FALLING);
@@ -140,6 +150,8 @@
       Serial.println("desperte");
     }
   }
+
+  /*Declaración de funciones*/ 
   void buzz_inicio()
   {
     digitalWrite(Pin_BUZZ, HIGH);   // Ponemos en alto(5V) el pin del buzzer
