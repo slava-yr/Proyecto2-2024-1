@@ -1,0 +1,6 @@
+//clock_prescale_set() function. This function allows you to divide the clock frequency by a prescaler value, which can be set to 1024, 256, 128, 64, 32, 16, 8, 4, 2, or 1.
+
+//Here's an example code snippet that sets the clock frequency to 32kHz:
+void setup() {
+  clock_prescale_set(clock_div_1024); // Set clock frequency to 32kHz
+}
