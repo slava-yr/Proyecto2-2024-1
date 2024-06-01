@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+#include <Adafruit_NeoPixel.h>
 
 #define i2c_Address 0x3c //initialize with the I2C addr 0x3C 
 
@@ -11,6 +12,8 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1   //   QT-PY / XIAO
 Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); //
+
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -253,6 +256,7 @@ void OLED::displayO2(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::displayCO(float measurement)
@@ -265,6 +269,7 @@ void OLED::displayCO(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::displayNO2(float measurement)
@@ -277,6 +282,7 @@ void OLED::displayNO2(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::calentandoScreen()
@@ -292,6 +298,7 @@ void OLED::calentandoScreen()
   }
   delay(DISPLAY_DELAY/2);
   display.clearDisplay();  
+  display.display();
 }
 
 void OLED::lowBattery()
@@ -303,4 +310,6 @@ void OLED::lowBattery()
   display.display();
   delay(STARTUP_DELAY); 
 }
+
+
 
