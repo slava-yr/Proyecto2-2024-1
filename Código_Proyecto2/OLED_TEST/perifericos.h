@@ -13,6 +13,7 @@
   * Ícono de batería baja
 
   TODO:
+  * Pantalla de carga completa
   * Código de tira LED: rutinas de color
   * Código de alarma:
     * Buzzer
@@ -37,21 +38,27 @@ class OLED
 
 };
 
-// class leds
-// {
-//   public:
-  
-// }
+class leds
+{
+  public: 
+    leds(uint8_t ledEnablePin);
+    void begin();
+    void Indicator();
+  private:
+    uint8_t _enableLeds;
+};
 
-// class alarma
-// {
-//   public:
-//     alarma();
-//     void begin();
-//     void alarmaON();
+class alarma
+{
+  public:
+    alarma();
+    void begin();
+    void alarmaON();
   
-//   private:
-//     int _pinVibrador;
-// };
+  private:
+    uint8_t _pinVibrador;
+    uint8_t _pinBuzzer;
+
+};
 
 #endif 

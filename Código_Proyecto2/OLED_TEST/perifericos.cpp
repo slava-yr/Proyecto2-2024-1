@@ -6,22 +6,25 @@
 #include <Adafruit_SH110X.h>
 #include <Adafruit_NeoPixel.h>
 
+// Para el OLED
 #define i2c_Address 0x3c //initialize with the I2C addr 0x3C 
-
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1   //   QT-PY / XIAO
-Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-// Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); //
-
-
 #define NUMFLAKES 10
 #define XPOS 0
 #define YPOS 1
 #define DELTAY 2
-
+Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define STARTUP_DELAY 500 // Time for the startup screens
 #define DISPLAY_DELAY 5000 // Time for each measurement
+
+
+// Para los leds
+#define NUMPIXELS 8
+#define LEDS_PIN 3
+#define LEDS_DELAY 100
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -331,4 +334,28 @@ void OLED::lowBattery() // Pantalla de batería baja
   display.clearDisplay();
   display.display();
   delay(STARTUP_DELAY); 
+}
+
+leds::leds(uint8_t ledEnablePin)
+{
+  _enableLeds = ledEnablePin;
+}
+
+void leds::begin()
+{
+  pixels.begin();
+  pinMode(_enableLeds, OUTPUT); 
+}
+
+void leds::Indicator(int r, int g, int b) // Prende todos los leds en un color con un delay entre cada uno
+{
+  for(int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(r, b, g)); 
+    delay(LEDS_DELAY);
+  }
+}
+
+alarma::alarma()
+{
+  
 }
