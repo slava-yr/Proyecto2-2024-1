@@ -23,33 +23,35 @@
 class OLED
 {
   public:
-    OLED();
+    OLED(uint8_t enablePinOLED);
     void begin();
     void displayO2(float measurement);
     void displayCO(float measurement);
     void displayNO2(float measurement);
     void calentandoScreen();
     void lowBattery();
-    
+    void wakeUp();
+    void displayLecturas(float measurementO2, float measurementCO, float measurementNO2);
   private:
+    uint8_t _enableOLED;
 
 };
 
-class leds
-{
-  public:
+// class leds
+// {
+//   public:
   
-}
+// }
 
-class alarma
-{
-  public:
-    alarma();
-    void begin();
-    void alarmaON();
+// class alarma
+// {
+//   public:
+//     alarma();
+//     void begin();
+//     void alarmaON();
   
-  private:
-    int _pinVibrador;
-};
+//   private:
+//     int _pinVibrador;
+// };
 
 #endif 

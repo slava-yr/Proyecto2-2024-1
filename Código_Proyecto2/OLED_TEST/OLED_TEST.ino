@@ -1,9 +1,10 @@
 #include "perifericos.h"
+#define OLED_ENABLE 3 // enable pin OLED
 
 const byte interruptPin = 2;
 volatile byte buttonFlag = 0;
 
-OLED oled_display; // Crea un oled_display
+OLED oled_display(OLED_ENABLE); // Crea un oled_display
 
 void setup() {
   // clock_prescale_set(clock_div_128); // Set clock frequency to 32kHz
