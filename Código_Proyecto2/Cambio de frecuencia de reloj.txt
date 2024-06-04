@@ -3,5 +3,5 @@
 //Here's an example code snippet that sets the clock frequency to 32kHz:
 #include <avr/power.h>
 void setup() {
-  clock_prescale_set(clock_div_1024); // Set clock frequency to 32kHz
+  clock_prescale_set(clock_div_2); // Set clock frequency to 32kHz
 }
