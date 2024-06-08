@@ -4,21 +4,27 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+#include <Adafruit_NeoPixel.h>
 
+// Para el OLED
 #define i2c_Address 0x3c //initialize with the I2C addr 0x3C 
-
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1   //   QT-PY / XIAO
-Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
 #define NUMFLAKES 10
 #define XPOS 0
 #define YPOS 1
 #define DELTAY 2
-
+Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define STARTUP_DELAY 500 // Time for the startup screens
 #define DISPLAY_DELAY 5000 // Time for each measurement
+
+
+// Para los leds
+#define NUMPIXELS 8
+#define LEDS_PIN 3
+#define LEDS_DELAY 100
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -221,24 +227,38 @@ const unsigned char lowBatteryIcon [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-OLED::OLED()
+OLED::OLED(uint8_t enablePinOLED)
 {
-
+  _enableOLED = enablePinOLED; // Set the pin for enabling the OLED displays
 }
 
-void OLED::begin()
+void OLED::begin() // First time 
 {
+  pinMode(_enableOLED, OUTPUT); // Control pin for OLED
+  digitalWrite(_enableOLED, HIGH); // Enable OLED 
   delay(STARTUP_DELAY/2); // wait for the OLED to power up
   display.begin(i2c_Address, true); // Address 0x3C default
   display.clearDisplay();
-  display.drawBitmap(0, 0, pucplogo, 128, 64, 1);
-  display.display();
+  display.drawBitmap(0, 0, pucplogo, 128, 64, 1); // Draw pucp logo
+  display.display(); // Display it
   delay(STARTUP_DELAY/2); 
   display.clearDisplay();
-  display.drawBitmap(0, 0, subterralogo, 128, 64, 1);
-  display.display();
+  display.drawBitmap(0, 0, subterralogo, 128, 64, 1); // Draw subterra logo
+  display.display(); // Display it
   delay(STARTUP_DELAY); 
-  display.clearDisplay();
+  display.clearDisplay(); // Clear display
+  display.setTextColor(SH110X_WHITE); // Set text color for writing 
+  // TODO: Temporizar el calentando screen para que sea el tiempo deseado
+  calentandoScreen(); // Screen de calentando sensores
+  digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+}
+
+void OLED::wakeUp() // Inicializa tras estar apagado
+{
+  digitalWrite(_enableOLED, HIGH);
+  delay(STARTUP_DELAY/2); // wait for the OLED to power up
+  display.begin(i2c_Address, true); // Address 0x3C default
+  display.clearDisplay(); 
   display.setTextColor(SH110X_WHITE);
 }
 
@@ -253,6 +273,7 @@ void OLED::displayO2(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::displayCO(float measurement)
@@ -265,6 +286,7 @@ void OLED::displayCO(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::displayNO2(float measurement)
@@ -277,6 +299,7 @@ void OLED::displayNO2(float measurement)
   display.display();
   delay(DISPLAY_DELAY);
   display.clearDisplay();
+  display.display();
 }
 
 void OLED::calentandoScreen()
@@ -292,9 +315,18 @@ void OLED::calentandoScreen()
   }
   delay(DISPLAY_DELAY/2);
   display.clearDisplay();  
+  display.display();
 }
 
-void OLED::lowBattery()
+void OLED::displayLecturas(float measurementO2, float measurementCO, float measurementNO2)
+{
+  displayO2(measurementO2);
+  displayCO(measurementCO);
+  displayNO2(measurementNO2);
+  digitalWrite(_enableOLED, LOW); // Apaga la pantalla tras mostrar las lecturas 
+}
+
+void OLED::lowBattery() // Pantalla de batería baja
 {
   display.drawBitmap(0, 0, lowBatteryIcon, 128, 64, 1);
   display.display();
@@ -304,3 +336,26 @@ void OLED::lowBattery()
   delay(STARTUP_DELAY); 
 }
 
+leds::leds(uint8_t ledEnablePin)
+{
+  _enableLeds = ledEnablePin;
+}
+
+void leds::begin()
+{
+  pixels.begin();
+  pinMode(_enableLeds, OUTPUT); 
+}
+
+void leds::Indicator(int r, int g, int b) // Prende todos los leds en un color con un delay entre cada uno
+{
+  for(int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(r, b, g)); 
+    delay(LEDS_DELAY);
+  }
+}
+
+alarma::alarma()
+{
+  
+}
