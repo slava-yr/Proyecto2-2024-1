@@ -61,7 +61,7 @@ uint32_t color_intensity(uint32_t color, uint8_t scale) {
 
 //patrón de luces de inicio del dispositivo
 //enciende y apaga atenuando los colores del arreglo colors[]
-void startupPattern() {
+void patron_inicio() {
   uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
   int numColors = sizeof(colors) / sizeof(colors[0]);
 
@@ -70,6 +70,7 @@ void startupPattern() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
+      digitalWrite(ON_OFF_VIB, HIGH);
       pixels.show();
       delay(8);
     }
@@ -80,6 +81,7 @@ void startupPattern() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
+      digitalWrite(ON_OFF_VIB, LOW);
       pixels.show();
       delay(8);
     }
@@ -87,45 +89,86 @@ void startupPattern() {
 
   for(int brightness = 100; brightness >= 0; brightness--) {
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, pixels.Color(brightness, brightness, brightness));
+      pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
     }
+    digitalWrite(ON_OFF_BUZZER, HIGH);
     pixels.show();
     delay(8);
   }
+  digitalWrite(ON_OFF_BUZZER, LOW);
+  delay(500);
 }
 
-void vib_inicio() {
-  digitalWrite(ON_OFF_VIB, HIGH);
-  delay(1000);
-  digitalWrite(ON_OFF_VIB, LOW);
-  delay(1000);
-}
-
-void vib_lectura_alta() {
+void lectura_alta() {
   for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 0, 0), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, HIGH);
-    delay(100);
+    digitalWrite(ON_OFF_BUZZER, HIGH);
+    delay(200);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 255), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, LOW);
-    delay(100);
+    digitalWrite(ON_OFF_BUZZER, LOW);
+    delay(200);
   }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(200);
 }
 
-void vib_lectura_moderada() {
-  for (int i = 0; i < 5; i++) {
+void lectura_moderada() {
+  for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 191, 0), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, HIGH);
-    delay(250);
+    digitalWrite(ON_OFF_BUZZER, HIGH);
+    delay(300);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, LOW);
-    delay(250);
+    digitalWrite(ON_OFF_BUZZER, LOW);
+    delay(300);
   }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(300);
 }
 
-void vib_lectura_normal() {
+void lectura_normal() {
   for (int i = 0; i < 3; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 255, 0), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, HIGH);
+    digitalWrite(ON_OFF_BUZZER, HIGH);
     delay(500);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
     digitalWrite(ON_OFF_VIB, LOW);
+    digitalWrite(ON_OFF_BUZZER, LOW);
     delay(500);
   }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(500);
 }
 
 
