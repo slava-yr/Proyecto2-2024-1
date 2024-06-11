@@ -24,7 +24,7 @@ void loop()
   // }
   
   oled_display.lowBattery();
-  oled_display.calentandoScreen();
+  // oled_display.calentandoScreen();
   oled_display.displayO2(80.0);
   oled_display.displayNO2(420.0);
   oled_display.displayCO(111.1);

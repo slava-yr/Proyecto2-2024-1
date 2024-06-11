@@ -1,5 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <avr/power.h>
+#include "perifericos.h"
 
 //Pines para la tira led
 #define COLOR_LED 3   //Pin PWM para el color de los LED
@@ -27,6 +28,7 @@
 
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
+OLED pantalla(ON_OFF_PANTALLA); // Crea un oled_display
 
 void setup() {
   // put your setup code here, to run once:
@@ -41,10 +43,18 @@ void setup() {
   pinMode(EN_NO2, OUTPUT);
 
   pixels.begin();
+  // pantalla.begin(); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Test leds
+  // digitalWrite(ON_OFF_LED, HIGH);
+  // patron_inicio();  
+  // lectura_alta();
+  digitalWrite(4, HIGH);
+  // Pantalla OLED
+  
+
 
 }
 
