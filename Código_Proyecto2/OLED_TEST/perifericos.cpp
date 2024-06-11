@@ -355,7 +355,7 @@ void leds::Indicator(int r, int g, int b) // Prende todos los leds en un color c
   }
 }
 
-alarma::alarma()
-{
+// alarma::alarma()
+// {
   
-}
+// }

@@ -43,22 +43,22 @@ class leds
   public: 
     leds(uint8_t ledEnablePin);
     void begin();
-    void Indicator();
+    void Indicator(int r, int b, int g);
   private:
     uint8_t _enableLeds;
 };
 
-class alarma
-{
-  public:
-    alarma();
-    void begin();
-    void alarmaON();
+// class alarma
+// {
+//   public:
+//     alarma();
+//     void begin();
+//     void alarmaON();
   
-  private:
-    uint8_t _pinVibrador;
-    uint8_t _pinBuzzer;
+//   private:
+//     uint8_t _pinVibrador;
+//     uint8_t _pinBuzzer;
 
-};
+// };
 
 #endif 
