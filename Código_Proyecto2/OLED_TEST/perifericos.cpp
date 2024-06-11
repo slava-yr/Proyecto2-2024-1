@@ -250,7 +250,7 @@ void OLED::begin() // First time
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
   calentandoScreen(); // Screen de calentando sensores
-  digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+  // digitalWrite(_enableOLED, LOW); // Apaga la pantalla
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado

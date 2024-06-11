@@ -48,10 +48,10 @@ void setup() {
 
 void loop() {
   // Test leds
-  // digitalWrite(ON_OFF_LED, HIGH);
-  // patron_inicio();  
-  // lectura_alta();
-  digitalWrite(4, HIGH);
+  digitalWrite(ON_OFF_LED, HIGH);
+  patron_inicio();  
+  lectura_alta()  ;
+
   // Pantalla OLED
   
 
