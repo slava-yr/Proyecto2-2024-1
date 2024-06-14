@@ -250,7 +250,7 @@ void OLED::begin() // First time
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
   calentandoScreen(); // Screen de calentando sensores
-  // digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+  digitalWrite(_enableOLED, LOW); // Apaga la pantalla
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado
@@ -264,7 +264,6 @@ void OLED::wakeUp() // Inicializa tras estar apagado
 
 void OLED::displayO2(float measurement)
 {
-  display.setTextColor(SH110X_WHITE); // Set text color for writing
   display.setTextSize(2);
   display.setCursor(0, 0);
   display.println("% O2\n");
