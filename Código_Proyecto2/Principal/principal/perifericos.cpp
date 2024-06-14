@@ -21,10 +21,10 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 
 
 // Para los leds
-// #define NUMPIXELS 8
-// #define LEDS_PIN 3
-// #define LEDS_DELAY 100
-// Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
+#define NUMLEDS 8
+#define LEDS_PIN 3 // Pin pwm para el color de los leds
+#define LEDS_DELAY 100
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -227,14 +227,22 @@ const unsigned char lowBatteryIcon [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-OLED::OLED(uint8_t enablePinOLED)
+/* **********************************************************
+ **********CÓDIGO DE CLASE OLED******************************
+ ***********************************************************/
+
+OLED::OLED(uint8_t enablePinOLED, uint8_t interruptPin)
 {
   _enableOLED = enablePinOLED; // Set the pin for enabling the OLED displays
+  _interruptPin = interruptPin; // Pin attached to the button
 }
 
 void OLED::begin() // First time 
+// Se apaga después del begin. Debes llamar el wakeup y luego lo que quieras hacer.
 {
   pinMode(_enableOLED, OUTPUT); // Control pin for OLED
+  pinMode(_interruptPin, INPUT);
+  // attachInterrupt(digitalPinToInterrupt(_interruptPin), handleButtonPress, RISING); // Interrupt
   digitalWrite(_enableOLED, HIGH); // Enable OLED 
   delay(STARTUP_DELAY/2); // wait for the OLED to power up
   display.begin(i2c_Address, true); // Address 0x3C default
@@ -336,26 +344,152 @@ void OLED::lowBattery() // Pantalla de batería baja
   delay(STARTUP_DELAY); 
 }
 
-// leds::leds(uint8_t ledEnablePin)
-// {
-//   _enableLeds = ledEnablePin;
-// }
+/* **********************************************************
+ **********CÓDIGO DE LOS INDICADORES******************************
+ ***********************************************************/
 
-// void leds::begin()
-// {
-//   pixels.begin();
-//   pinMode(_enableLeds, OUTPUT); 
-// }
+indicadores::indicadores(uint8_t ledEnablePin, uint8_t vibEnablePin, uint8_t buzzerEnablePin)
+{
+  _enableLeds = ledEnablePin; 
+  _enableVibrador = vibEnablePin;
+  _enableBuzzer = buzzerEnablePin;
+}
 
-// void leds::Indicator(int r, int g, int b) // Prende todos los leds en un color con un delay entre cada uno
-// {
-//   for(int i = 0; i < NUMPIXELS; i++) {
-//     pixels.setPixelColor(i, pixels.Color(r, b, g)); 
-//     delay(LEDS_DELAY);
-//   }
-// }
+void indicadores::begin()
+{
+  pinMode(_enableLeds, OUTPUT);
+  pinMode(_enableVibrador, OUTPUT);
+  pinMode(_enableBuzzer, OUTPUT);
+}
 
-// alarma::alarma()
-// {
-  
-// }
+  //controla la intensidad de cada color ingresado(0-100%)y devuelve el comando pixels con la intensidad adecuada
+uint32_t indicadores::color_intensity(uint32_t color, uint8_t scale) {
+  uint8_t r = (color >> 16) & 0xFF;
+  uint8_t g = (color >> 8) & 0xFF;
+  uint8_t b = color & 0xFF;
+  r = (r * scale) / 100;
+  g = (g * scale) / 100;
+  b = (b * scale) / 100;
+  return pixels.Color(r, g, b);
+}
+
+//patrón de luces de inicio del dispositivo
+//enciende y apaga atenuando los colores del arreglo colors[]
+void indicadores::patron_inicio() {
+  uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
+  int numColors = sizeof(colors) / sizeof(colors[0]);
+
+  for(int j = 0; j < numColors; j++) {
+    for(int brightness = 0; brightness <= 100; brightness++) {
+      for(int i = 0; i < NUMLEDS; i++) {
+        pixels.setPixelColor(i, color_intensity(colors[j], brightness));
+      }
+      digitalWrite(_enableVibrador, HIGH);
+      pixels.show();
+      delay(8);
+    }
+
+    delay(300);
+
+    for(int brightness = 100; brightness >= 0; brightness--) {
+      for(int i = 0; i < NUMLEDS; i++) {
+        pixels.setPixelColor(i, color_intensity(colors[j], brightness));
+      }
+      digitalWrite(_enableVibrador, LOW);
+      pixels.show();
+      delay(8);
+    }
+  }
+
+  for(int brightness = 100; brightness >= 0; brightness--) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
+    }
+    digitalWrite(_enableBuzzer, HIGH);
+    pixels.show();
+    delay(8);
+  }
+  digitalWrite(_enableBuzzer, LOW);
+  delay(500);
+}
+
+void indicadores::lectura_alta() {
+  for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 0, 0), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, HIGH);
+    digitalWrite(_enableBuzzer, HIGH);
+    delay(200);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 255), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, LOW);
+    digitalWrite(_enableBuzzer, LOW);
+    delay(200);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(200);
+}
+
+void indicadores::lectura_moderada() {
+  for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 191, 0), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, HIGH);
+    digitalWrite(_enableBuzzer, HIGH);
+    delay(300);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, LOW);
+    digitalWrite(_enableBuzzer, LOW);
+    delay(300);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(300);
+}
+
+void indicadores::lectura_normal() {
+  for (int i = 0; i < 3; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 255, 0), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, HIGH);
+    digitalWrite(_enableBuzzer, HIGH);
+    delay(500);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
+    digitalWrite(_enableVibrador, LOW);
+    digitalWrite(_enableBuzzer, LOW);
+    delay(500);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(500);
+}
+
+/* **********************************************************
+ **********CÓDIGO DEL BOTÓN******************************
+ ***********************************************************/
+
+// TODO:
+// * hacer la función de interrupción
+// 
+
