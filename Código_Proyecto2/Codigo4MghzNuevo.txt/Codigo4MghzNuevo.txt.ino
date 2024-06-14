@@ -1,4 +1,5 @@
 #include <LowPower.h>
+#include <avr/power.h>
 
 // Button pin configuration
 const int buttonPin = 7;
@@ -16,9 +17,12 @@ void sleep();
 volatile int gasValue = 0;
 volatile bool buttonPressed = false;
 volatile int wakeUpCount = 0;
-const int wakeUpLimit = 15; // 15 * 8 seconds = 120 seconds (2 minutes), but with taking into account all delays, will update every 2 minutes and ~25 seconds
+const int wakeUpLimit = 2; // Update every 16 seconds (2 * 8 seconds)
 
 void setup() {
+  // Reduce the clock frequency to 4 MHz (assuming original frequency is 8 MHz)
+  clock_prescale_set(clock_div_2);
+
   // Initialize the button pin as input with pull-up resistor
   pinMode(buttonPin, INPUT_PULLUP);
 
@@ -34,12 +38,21 @@ void setup() {
 
   // Initial message indicating readiness (using Serial for demonstration)
   Serial.begin(9600);
+  while (!Serial); // Wait for serial port to connect. Needed for native USB
   Serial.println("Gas Detector Ready");
+
+  // Update value initially
+  updateValue();
 }
 
 void loop() {
   // Enter power down state with ADC and BOD disabled
   sleep();
+
+  // Re-initialize Serial communication after waking up
+  Serial.begin(9600);
+  while (!Serial); // Wait for serial port to connect. Needed for native USB
+  delay(100); // Allow time for Serial to stabilize
 
   // Wake-up routine
   if (buttonPressed) {
@@ -58,7 +71,7 @@ void updateValue() {
   digitalWrite(sensorPowerPin, HIGH);
 
   // Allow some time for the sensor to stabilize if necessary (adjust as needed)
-  delay(1000);
+  delay(2000); // Adjusted for 4 MHz clock frequency
 
   // Enable ADC to read the sensor value
   ADCSRA |= (1 << ADEN);
@@ -83,7 +96,7 @@ void showDisplay() {
   Serial.println(gasValue);
 
   // Wait a little bit to debounce button
-  delay(300);
+  delay(600); // Adjusted for 4 MHz clock frequency
 }
 
 void sleep() {

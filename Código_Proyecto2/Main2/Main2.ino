@@ -35,11 +35,18 @@ void setup() {
   // Initial message indicating readiness (using Serial for demonstration)
   Serial.begin(9600);
   Serial.println("Gas Detector Ready");
+
+  // Update value initially
+  updateValue();
 }
 
 void loop() {
   // Enter power down state with ADC and BOD disabled
   sleep();
+delay(4000);
+  // Re-initialize Serial communication after waking up
+  Serial.begin(9600);
+  delay(1000); // Allow time for Serial to stabilize
 
   // Wake-up routine
   if (buttonPressed) {
@@ -56,9 +63,12 @@ void loop() {
 void updateValue() {
   // Turn on the sensor
   digitalWrite(sensorPowerPin, HIGH);
-
+  // Serial.end();
+//Serial.begin(9600);
+  //  Serial.end(); // Close the serial connection
+    //Serial.begin(9600); // Reopen it
   // Allow some time for the sensor to stabilize if necessary (adjust as needed)
-  delay(1000);
+  delay(10000);
 
   // Enable ADC to read the sensor value
   ADCSRA |= (1 << ADEN);
@@ -69,7 +79,7 @@ void updateValue() {
   digitalWrite(sensorPowerPin, LOW);
 
   // Print the new value to Serial Monitor for debugging
-  Serial.print("Updated Gas Value: ");
+  Serial.print(".....Updated Gas Value: ");
   Serial.println(gasValue);
 }
 
