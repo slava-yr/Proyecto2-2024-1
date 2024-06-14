@@ -9,9 +9,11 @@ const int twaInterval = 2; // 2 minutos para almacenar un valor de TWA
 const int maxTwaMeasurements = twaPeriod / twaInterval; // 8 horas / 2 minutos = 240
 float twaMeasurements[maxTwaMeasurements]; // Array para almacenar los valores de TWA
 int twaCount = 0; // Contador de mediciones de TWA
-int stelCount = 0; // Contador de mediciones de STEL para TWA
 
 float valorPico = 0.0; // Variable para almacenar el valor pico
+
+const float STELmax = 30.0; // Valor máximo permitido para STEL en ppm
+const float TWAmax = 20.0; // Valor máximo permitido para TWA en ppm
 
 unsigned long lastMeasurementTime = 0;
 
@@ -47,7 +49,6 @@ void loop() {
     if (measurementCount < maxStelMeasurements) {
       gasMeasurements[measurementCount] = newGasData;
       measurementCount++;
-      Serial.println("Todavía no pasan 15 minutos para el cálculo de STEL");
     } else {
       for (int i = 0; i < maxStelMeasurements - 1; i++) {
         gasMeasurements[i] = gasMeasurements[i + 1];
@@ -66,30 +67,40 @@ void loop() {
       Serial.print(stel, 2);
       Serial.println(" ppm");
 
-      // Actualizar las mediciones almacenadas para TWA
-      if (twaCount < maxTwaMeasurements) {
-        twaMeasurements[twaCount] = newGasData;
-        twaCount++;
-      } else {
-        for (int i = 0; i < maxTwaMeasurements - 1; i++) {
-          twaMeasurements[i] = twaMeasurements[i + 1];
-        }
-        twaMeasurements[maxTwaMeasurements - 1] = newGasData;
+      // Comparar con STELmax
+      if (stel > STELmax) {
+        Serial.println("Activar alarma: STEL excedido!");
       }
+    }
 
-      // Calcular el TWA
-      float twa = 0.0;
-      for (int i = 0; i < twaCount; i++) {
-        twa += twaMeasurements[i];
+    // Actualizar las mediciones almacenadas para TWA
+    if (twaCount < maxTwaMeasurements) {
+      twaMeasurements[twaCount] = newGasData;
+      twaCount++;
+    } else {
+      for (int i = 0; i < maxTwaMeasurements - 1; i++) {
+        twaMeasurements[i] = twaMeasurements[i + 1];
       }
-      if (twaCount > 0) {
-        twa /= twaCount;
-      }
+      twaMeasurements[maxTwaMeasurements - 1] = newGasData;
+    }
 
-      // Imprimir el valor de TWA
-      Serial.print("TWA: ");
-      Serial.print(twa, 2);
-      Serial.println(" ppm");
+    // Calcular el TWA
+    float twa = 0.0;
+    for (int i = 0; i < twaCount; i++) {
+      twa += twaMeasurements[i];
+    }
+    if (twaCount > 0) {
+      twa /= twaCount;
+    }
+
+    // Imprimir el valor de TWA
+    Serial.print("TWA: ");
+    Serial.print(twa, 2);
+    Serial.println(" ppm");
+
+    // Comparar con TWAmax
+    if (twa > TWAmax) {
+      Serial.println("Activar alarma: TWA excedido!");
     }
   }
 }
