@@ -345,8 +345,8 @@ void OLED::lowBattery() // Pantalla de batería baja
 }
 
 /* **********************************************************
- **********CÓDIGO DE LOS INDICADORES******************************
- ***********************************************************/
+ **********CÓDIGO DE LOS INDICADORES*************************
+ ************************************************************/
 
 indicadores::indicadores(uint8_t ledEnablePin, uint8_t vibEnablePin, uint8_t buzzerEnablePin)
 {
