@@ -11,55 +11,50 @@
   * NO2 (ppm), CO (ppm), O2 (%)
   * Pantalla 1: Calentando sensores
   * Ícono de batería baja
+  * Código de tira LED: rutinas de color
+  * Código de alarma:
 
   TODO:
   * Pantalla de carga completa
-  * Código de tira LED: rutinas de color
-  * Código de alarma:
-    * Buzzer
-    * Vibrador 
-    * Luces intermitentes 
-  * Descomentar el código correspondiente a leds y alarma
+  * Interrupciones del botón para activar la pantalla
+  * 
   ************************************************/
 
 class OLED
 {
   public:
-    OLED(uint8_t enablePinOLED);
+    OLED(uint8_t enablePinOLED, uint8_t interruptPin);
     void begin();
+    // Displays individuales
     void displayO2(float measurement);
     void displayCO(float measurement);
     void displayNO2(float measurement);
-    void calentandoScreen();
-    void lowBattery();
+
+    void calentandoScreen(); // Calentamiento de sensores
+
+    void lowBattery(); 
     void wakeUp();
     void displayLecturas(float measurementO2, float measurementCO, float measurementNO2);
   private:
     uint8_t _enableOLED;
-
+    uint8_t _interruptPin;
 };
 
-// class leds
-// {
-//   public: 
-//     leds(uint8_t ledEnablePin);
-//     void begin();
-//     void Indicator(int r, int b, int g);
-//   private:
-//     uint8_t _enableLeds;
-// };
+class indicadores
+{
+  public: 
+    indicadores(uint8_t ledEnablePin, uint8_t vibEnablePin, uint8_t buzzerEnablePin);
+    void begin();
+    uint32_t color_intensity(uint32_t color, uint8_t scale);
+    void patron_inicio();
+    void lectura_alta();
+    void lectura_moderada();
+    void lectura_normal();
 
-// class alarma
-// {
-//   public:
-//     alarma();
-//     void begin();
-//     void alarmaON();
-  
-//   private:
-//     uint8_t _pinVibrador;
-//     uint8_t _pinBuzzer;
-
-// };
+  private:
+    uint8_t _enableLeds;
+    uint8_t _enableVibrador;
+    uint8_t _enableBuzzer;
+};
 
 #endif 
