@@ -31,7 +31,6 @@ OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
 
 void setup() {
-  // put your setup code here, to run once:
   pinMode(INT0, INPUT);
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
