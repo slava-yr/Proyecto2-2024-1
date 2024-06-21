@@ -18,7 +18,8 @@
 #define EN_NO2 9  
 
 //Pin de interrupción
-#define INT0 2 //Pin de interrupción
+// CAMBIAR A 2 DE NUEVO, SOLO ES PARA PROBAR
+#define INT0 9// 2//Pin de interrupción
 
 //Pines de lectura del ADC
 #define BAT_VOLT A6 //Pin de lectura de la tensión en la batería
@@ -30,15 +31,28 @@
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
 
+char selected_mode;
+
 void setup() {
   pinMode(INT0, INPUT);
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
 
+  Serial.begin(9600);
   pantalla.begin(); 
   indicadores.begin();
+  selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
 }
 
 void loop() {
+  /******** BOSQUEJO DE CÓDIGO PRINCIPAL ***********/ 
+  // TOMAR MEDICIONES DE LOS SENSORES Y GUARDARLAS. GUARDAR VALOR PICO
+  // EN las mediciones de arriba también hay que incluir la medición de batería.
+  // CALCULAR STEL/TWA (SEGÚN SELECCIÓN DEL USUARIO)
+  // VERIFICAR SI SUPERA VALORES LÍMITES (revisar valores límite):
+    // Si supera, iniciar alarma (2 modos: moderado y alto)
+  // REVISAR LA BANDERA DE INTERRUPCIÓN POR BOTÓN
+  // Si está alta, imprimir en la pantalla las lecturas actuales y el valor de STEL/TWA 
+  // 
 
 }

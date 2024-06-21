@@ -353,7 +353,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
   int endPressed = 0;      // the moment the button was released
   unsigned long int holdTime = 0;        // how long the button was hold
   char lastMode = 'T'; // Initialize last mode
-  char finalMode;
+  char finalMode; // Return variable
 
   lastMode = updateDisplay(lastMode);
   while(1) // Loop hasta que el usuario escoja una opción
@@ -386,7 +386,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
       {
         Serial.println("STEL");
       }
-      return; // Pasar al programa principal
+      return finalMode; // Pasar al programa principal
     }
   }
 }

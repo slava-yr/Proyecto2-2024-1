@@ -31,11 +31,12 @@ void loop() {
   if (buttonState != lastButtonState) { // button state changed
     updateState();
   }
-  lastButtonState = buttonState;        // save state for next loop
+  lastButtonState = buttonState; // save state for next loop
 
   if (100 < holdTime && holdTime < 500) // Change screen
   {
-    lastMode = pantalla.updateDisplay(lastMode);
+    lastMode = pantalla.updateDisplay(lastMode);  
+    Serial.println(holdTime);
     holdTime = 0;
   }
 
@@ -64,6 +65,5 @@ void updateState() {
   {
     endPressed = millis();
     holdTime = endPressed - startPressed;
-    // if (holdTime > 100) Serial.println(holdTime);
   }
 }

@@ -35,6 +35,9 @@ class OLED
     void lowBattery(); 
     void wakeUp();
     void displayLecturas(float measurementO2, float measurementCO, float measurementNO2);
+    char updateDisplay(char lastMode);
+    char selectMode();
+    
   private:
     uint8_t _enableOLED;
     uint8_t _interruptPin;

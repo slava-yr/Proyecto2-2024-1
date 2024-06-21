@@ -227,6 +227,7 @@ const unsigned char lowBatteryIcon [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
+
 /* **********************************************************
  **********CÓDIGO DE CLASE OLED******************************
  ***********************************************************/
@@ -241,7 +242,7 @@ void OLED::begin() // First time
 // Se apaga después del begin. Debes llamar el wakeup y luego lo que quieras hacer.
 {
   pinMode(_enableOLED, OUTPUT); // Control pin for OLED
-  pinMode(_interruptPin, INPUT);
+  pinMode(_interruptPin, INPUT_PULLUP);
   // attachInterrupt(digitalPinToInterrupt(_interruptPin), handleButtonPress, RISING); // Interrupt
   digitalWrite(_enableOLED, HIGH); // Enable OLED 
   delay(STARTUP_DELAY/2); // wait for the OLED to power up
@@ -257,7 +258,7 @@ void OLED::begin() // First time
   display.clearDisplay(); // Clear display
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
-  calentandoScreen(); // Screen de calentando sensores
+  // calentandoScreen(); // Screen de calentando sensores
   digitalWrite(_enableOLED, LOW); // Apaga la pantalla
 }
 
@@ -344,6 +345,94 @@ void OLED::lowBattery() // Pantalla de batería baja
   delay(STARTUP_DELAY); 
 }
 
+char OLED::selectMode() // Selecciona el modo: TWA o STEL
+{
+  int buttonState = 0; // Current state of the button
+  int lastButtonState = 1; // previous state of the button
+  int startPressed = 0;    // the moment the button was pressed
+  int endPressed = 0;      // the moment the button was released
+  unsigned long int holdTime = 0;        // how long the button was hold
+  char lastMode = 'T'; // Initialize last mode
+  char finalMode; // Return variable
+
+  lastMode = updateDisplay(lastMode);
+  while(1) // Loop hasta que el usuario escoja una opción
+  {
+    buttonState = digitalRead(_interruptPin); // read the button input
+    if (buttonState != lastButtonState) { // button state changed
+      if (buttonState == LOW)
+      {
+        startPressed = millis(); // the button has been just pressed
+      }  
+      else // the button has been just released 
+      {
+        endPressed = millis();
+        holdTime = endPressed - startPressed;
+      }
+    }
+    lastButtonState = buttonState;        // save state for next loop
+
+    if (100 < holdTime && holdTime < 500) // Quick press: Change screen
+    {
+      lastMode = updateDisplay(lastMode);
+      Serial.println(holdTime);
+      holdTime = 0;
+    }
+
+    if (holdTime > 1200) // Confirmar opción
+    {
+      finalMode = lastMode;
+      // Pantalla de modo seleccionado
+      display.clearDisplay();
+      display.setCursor(0, 0);
+      display.setTextSize(5);  
+
+      Serial.println("Seleccionó ");
+      if (finalMode == 'T')
+      {
+        display.println("TWA");
+        Serial.println("TWA");
+      }
+      else
+      {
+        Serial.println("STEL");
+        display.println("STEL");
+      }
+      display.setTextSize(1);
+      display.print("\nSeleccionado");
+      display.display();
+      delay(1000);
+      return finalMode;
+    }
+  }
+}
+
+char OLED::updateDisplay(char lastMode)
+{
+  char newMode;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Seleccione: \n\n");
+  display.setTextSize(5);  
+  
+  if (lastMode == 'T') // TWA
+  { 
+    Serial.println("STEL");
+    display.println("STEL"); 
+    newMode = 'S'; // STEL
+  }
+  else if (lastMode == 'S')
+  {
+    Serial.println("TWA");
+    display.println("TWA"); 
+    newMode = 'T'; // TWA
+  } 
+
+  display.display();
+  return newMode;
+}
 /* **********************************************************
  **********CÓDIGO DE LOS INDICADORES*************************
  ************************************************************/
