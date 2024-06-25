@@ -22,9 +22,10 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 
 // Para los leds
 #define NUMLEDS 8
-#define LEDS_PIN 3 // Pin pwm para el color de los leds
+#define COLOR_LED 3 // Pin pwm para el color de los leds
 #define LEDS_DELAY 100
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
+
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -355,6 +356,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
   char lastMode = 'T'; // Initialize last mode
   char finalMode; // Return variable
 
+  wakeUp();
   lastMode = updateDisplay(lastMode);
   while(1) // Loop hasta que el usuario escoja una opción
   {
@@ -465,6 +467,7 @@ uint32_t indicadores::color_intensity(uint32_t color, uint8_t scale) {
 //patrón de luces de inicio del dispositivo
 //enciende y apaga atenuando los colores del arreglo colors[]
 void indicadores::patron_inicio() {
+  digitalWrite(_enableLeds, HIGH);
   uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
   int numColors = sizeof(colors) / sizeof(colors[0]);
 
@@ -473,7 +476,7 @@ void indicadores::patron_inicio() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
-      digitalWrite(_enableVibrador, HIGH);
+      //digitalWrite(ON_OFF_VIB, HIGH);
       pixels.show();
       delay(8);
     }
@@ -484,7 +487,7 @@ void indicadores::patron_inicio() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
-      digitalWrite(_enableVibrador, LOW);
+      //digitalWrite(ON_OFF_VIB, LOW);
       pixels.show();
       delay(8);
     }
@@ -494,11 +497,11 @@ void indicadores::patron_inicio() {
     for(int i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
     }
-    digitalWrite(_enableBuzzer, HIGH);
+    //digitalWrite(ON_OFF_BUZZER, HIGH);
     pixels.show();
     delay(8);
   }
-  digitalWrite(_enableBuzzer, LOW);
+  //digitalWrite(ON_OFF_BUZZER, LOW);
   delay(500);
 }
 
@@ -574,11 +577,5 @@ void indicadores::lectura_normal() {
   delay(500);
 }
 
-/* **********************************************************
- **********CÓDIGO DEL BOTÓN******************************
- ***********************************************************/
 
-// TODO:
-// * hacer la función de interrupción
-// 
 

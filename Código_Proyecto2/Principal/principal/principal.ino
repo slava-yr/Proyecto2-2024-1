@@ -3,9 +3,7 @@
 #include "perifericos.h"
 
 //Pines para la tira led
-#define COLOR_LED 3   //Pin PWM para el color de los LED
 #define ON_OFF_LED A3 //Pin para habilitar alimentación de los LED
-#define NUMLEDS 8     //Número de LEDs en la tira 
 
 //Pines de habilitación de alimentación
 #define ON_OFF_BUZZER 4   //Pin habilitador de buzzer
@@ -19,7 +17,7 @@
 
 //Pin de interrupción
 // CAMBIAR A 2 DE NUEVO, SOLO ES PARA PROBAR
-#define INT0 9// 2//Pin de interrupción
+#define INT0 2// 2//Pin de interrupción
 
 //Pines de lectura del ADC
 #define BAT_VOLT A6 //Pin de lectura de la tensión en la batería
@@ -41,7 +39,8 @@ void setup() {
   Serial.begin(9600);
   pantalla.begin(); 
   indicadores.begin();
-  selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  indicadores.patron_inicio();
+  // selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
 }
 
 void loop() {
@@ -54,5 +53,6 @@ void loop() {
   // REVISAR LA BANDERA DE INTERRUPCIÓN POR BOTÓN
   // Si está alta, imprimir en la pantalla las lecturas actuales y el valor de STEL/TWA 
   // 
-
+  indicadores.patron_inicio();
+  // digitalWrite(ON_OFF_LED, HIGH);
 }
