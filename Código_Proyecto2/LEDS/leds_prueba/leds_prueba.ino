@@ -104,3 +104,75 @@ void patron_inicio() {
   //digitalWrite(ON_OFF_BUZZER, LOW);
   delay(500);
 }
+
+void lectura_alta() {
+  for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 0, 0), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, HIGH);
+    //digitalWrite(ON_OFF_BUZZER, HIGH);
+    delay(200);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 255), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, LOW);
+    //digitalWrite(ON_OFF_BUZZER, LOW);
+    delay(200);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(200);
+}
+
+void lectura_moderada() {
+  for (int i = 0; i < 10; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 191, 0), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, HIGH);
+    //digitalWrite(ON_OFF_BUZZER, HIGH);
+    delay(300);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, LOW);
+    //digitalWrite(ON_OFF_BUZZER, LOW);
+    delay(300);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(300);
+}
+
+void lectura_normal() {
+  for (int i = 0; i < 3; i++) {
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 255, 0), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, HIGH);
+    //digitalWrite(ON_OFF_BUZZER, HIGH);
+    delay(500);
+
+    for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+    }
+    pixels.show();
+    //digitalWrite(ON_OFF_VIB, LOW);
+    //digitalWrite(ON_OFF_BUZZER, LOW);
+    delay(500);
+  }
+  for(int i = 0; i < NUMLEDS; i++) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  delay(500);
+}

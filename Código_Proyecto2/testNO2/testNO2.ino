@@ -1,80 +1,79 @@
+ /*!
+  * @file  getGasPPM.ino
+  * @brief Reading Gas concentration, A concentration of one part per million (PPM).
+  * @n When using IIC device, select I2C address, set the dialing switch A0, A1 (Address_0 is [0 0]), (Address_1 is [1 0]), (Address_2 is [0 1]), (Address_3 is [1 1]).
+  * @n When using the Breakout version, connect the adcPin and PowerPin
+  * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
+  * @licence     The MIT License (MIT)
+  * @author      ZhixinLiu(zhixin.liu@dfrobot.com)
+  * @version     V1.1
+  * @date        2021-04-19
+  * @get         from https://www.dfrobot.com
+  * @url         https://github.com/dfrobot/DFRobot_MICS
+  */
 #include "DFRobot_MICS.h"
 
-#define CALIBRATION_TIME 3 // Tiempo de calibración predeterminado de tres minutos
+#define CALIBRATION_TIME   1                      // Default calibration time is three minutes
 
-// Definición de pines para los sensores
-#define SENSOR1_ADC_PIN   A1
-#define SENSOR1_POWER_PIN 10
-#define SENSOR2_ADC_PIN   A2
-#define SENSOR2_POWER_PIN 11
+// When using the Breakout version, use the following program to construct an object from DFRobot_MICS_ADC
+/**!
+  adcPin is A0~A5
+  powerPin is General IO
+*/
+#define ADC_PIN   A0
+#define POWER_PIN 10
+DFRobot_MICS_ADC mics(/*adcPin*/ADC_PIN, /*powerPin*/POWER_PIN);
 
-DFRobot_MICS_ADC mics1(SENSOR1_ADC_PIN, SENSOR1_POWER_PIN);
-DFRobot_MICS_ADC mics2(SENSOR2_ADC_PIN, SENSOR2_POWER_PIN);
-
-void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-
-  // Inicialización del primer sensor
-  pinMode(SENSOR1_POWER_PIN, OUTPUT);
-  digitalWrite(SENSOR1_POWER_PIN, HIGH);
-
-  while (!mics1.begin()) {
-    Serial.println("No Devices for Sensor 1!");
+void setup() 
+{
+  Serial.begin(115200);
+  while(!Serial);
+  while(!mics.begin()){
+    Serial.println("NO Deivces !");
     delay(1000);
-  }
-  Serial.println("Sensor 1 connected successfully!");
+  } Serial.println("Device connected successfully !");
 
-  uint8_t mode1 = mics1.getPowerState();
-  if (mode1 == SLEEP_MODE) {
-    mics1.wakeUpMode();
-    Serial.println("Wake up Sensor 1 success!");
-  } else {
-    Serial.println("Sensor 1 is in wake up mode");
-  }
-
-  // Inicialización del segundo sensor
-  pinMode(SENSOR2_POWER_PIN, OUTPUT);
-  digitalWrite(SENSOR2_POWER_PIN, HIGH);
-
-  while (!mics2.begin()) {
-    Serial.println("No Devices for Sensor 2!");
-    delay(1000);
-  }
-  Serial.println("Sensor 2 connected successfully!");
-
-  uint8_t mode2 = mics2.getPowerState();
-  if (mode2 == SLEEP_MODE) {
-    mics2.wakeUpMode();
-    Serial.println("Wake up Sensor 2 success!");
-  } else {
-    Serial.println("Sensor 2 is in wake up mode");
+  /**!
+    Gets the power mode of the sensor
+    The sensor is in sleep mode when power is on,so it needs to wake up the sensor. 
+    The data obtained in sleep mode is wrong
+   */
+  uint8_t mode = mics.getPowerState();
+  if(mode == SLEEP_MODE){
+    mics.wakeUpMode();
+    Serial.println("wake up sensor success!");
+  }else{
+    Serial.println("The sensor is wake up mode");
   }
 
-  // Calentamiento de los sensores
-  while (!mics1.warmUpTime(CALIBRATION_TIME)) {
-    Serial.println("Please wait until the warm-up time for Sensor 1 is over!");
-    delay(1000);
-  }
-
-  while (!mics2.warmUpTime(CALIBRATION_TIME)) {
-    Serial.println("Please wait until the warm-up time for Sensor 2 is over!");
+  /**!
+     Do not touch the sensor probe when preheating the sensor.
+     Place the sensor in clean air.
+     The default calibration time is 3 minutes.
+  */
+  while(!mics.warmUpTime(CALIBRATION_TIME)){
+    Serial.println("Please wait until the warm-up time is over!");
     delay(1000);
   }
 }
 
-void loop() {
-  // Lectura de datos del primer sensor
-  float gasdata1 = mics1.getGasData(C2H5OH);
-  Serial.print("Sensor 1 Ethanol Value: ");
-  Serial.print(gasdata1, 1);
+void loop() 
+{
+  /**!
+    Gas type:
+    MICS-4514 You can get all gas concentration
+    MICS-5524 You can get the concentration of CH4, C2H5OH, H2, NH3, CO
+    MICS-2714 You can get the concentration of NO2
+      Methane          (CH4)    (1000 - 25000)PPM
+      Ethanol          (C2H5OH) (10   - 500)PPM
+      Hydrogen         (H2)     (1    - 1000)PPM
+      Ammonia          (NH3)    (1    - 500)PPM
+      Carbon Monoxide  (CO)     (1    - 1000)PPM
+      Nitrogen Dioxide (NO2)    (0.1  - 10)PPM
+  */
+  float gasdata = mics.getGasData(NO2);
+  Serial.print(gasdata,1);
   Serial.println(" PPM");
-
-  // Lectura de datos del segundo sensor
-  float gasdata2 = mics2.getGasData(C2H5OH);
-  Serial.print("Sensor 2 Ethanol Value: ");
-  Serial.print(gasdata2, 1);
-  Serial.println(" PPM");
-
   delay(1000);
+  //mics.sleepMode();
 }
