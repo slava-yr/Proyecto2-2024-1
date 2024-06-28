@@ -36,15 +36,23 @@ void setup() {
   pinMode(INT0, INPUT);
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
+  pinMode(ON_OFF_SENSORES, OUTPUT);
 
+// Alimentar sensores para calentar
+  digitalWrite(ON_OFF_SENSORES, HIGH);
+  digitalWrite(EN_CO, HIGH);
+  digitalWrite(EN_NO2, HIGH);
+  
+  indicadores.begin();
   Serial.begin(9600);
   pantalla.begin(); 
-  indicadores.begin();
   indicadores.patron_inicio();
   selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  pantalla.calentandoScreen();
 }
 
 void loop() {
+  
   /******** BOSQUEJO DE CÓDIGO PRINCIPAL ***********/ 
   // TOMAR MEDICIONES DE LOS SENSORES Y GUARDARLAS. GUARDAR VALOR PICO
   // EN las mediciones de arriba también hay que incluir la medición de batería.
@@ -53,7 +61,4 @@ void loop() {
     // Si supera, iniciar alarma (2 modos: moderado y alto)
   // REVISAR LA BANDERA DE INTERRUPCIÓN POR BOTÓN
   // Si está alta, imprimir en la pantalla las lecturas actuales y el valor de STEL/TWA 
-  // 
-  indicadores.patron_inicio();
-  // digitalWrite(ON_OFF_LED, HIGH);
 }

@@ -255,8 +255,7 @@ void OLED::begin() // First time
   display.clearDisplay();
   display.drawBitmap(0, 0, subterralogo, 128, 64, 1); // Draw subterra logo
   display.display(); // Display it
-  delay(STARTUP_DELAY); 
-  display.clearDisplay(); // Clear display
+  // delay(STARTUP_DELAY); 
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
   // calentandoScreen(); // Screen de calentando sensores
@@ -377,7 +376,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
     if (100 < holdTime && holdTime < 500) // Quick press: Change screen
     {
       lastMode = updateDisplay(lastMode);
-      Serial.println(holdTime);
+      // Serial.println(holdTime);
       holdTime = 0;
     }
 
@@ -416,7 +415,7 @@ char OLED::updateDisplay(char lastMode)
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.println("Seleccione: \n\n");
+  display.println("Seleccione el modo de medicion: \n");
   display.setTextSize(5);  
   
   if (lastMode == 'T') // TWA
@@ -433,6 +432,7 @@ char OLED::updateDisplay(char lastMode)
   } 
 
   display.display();
+  delay(600);
   return newMode;
 }
 /* **********************************************************
@@ -451,6 +451,9 @@ void indicadores::begin()
   pinMode(_enableLeds, OUTPUT);
   pinMode(_enableVibrador, OUTPUT);
   pinMode(_enableBuzzer, OUTPUT);
+  digitalWrite(_enableBuzzer, HIGH);
+  delay(400);
+  digitalWrite(_enableBuzzer, LOW);
 }
 
   //controla la intensidad de cada color ingresado(0-100%)y devuelve el comando pixels con la intensidad adecuada
