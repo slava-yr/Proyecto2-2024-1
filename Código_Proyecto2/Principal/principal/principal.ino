@@ -4,6 +4,7 @@
 
 //Pines para la tira led
 #define ON_OFF_LED A3 //Pin para habilitar alimentación de los LED
+#define COLOR_LED 3 // Pin pwm para el color de los leds
 
 //Pines de habilitación de alimentación
 #define ON_OFF_BUZZER 4   //Pin habilitador de buzzer
@@ -16,8 +17,7 @@
 #define EN_NO2 9  
 
 //Pin de interrupción
-// CAMBIAR A 2 DE NUEVO, SOLO ES PARA PROBAR
-#define INT0 2// 2//Pin de interrupción
+#define INT0 2
 
 //Pines de lectura del ADC
 #define BAT_VOLT A6 //Pin de lectura de la tensión en la batería
@@ -32,6 +32,7 @@ indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indi
 char selected_mode;
 
 void setup() {
+  pinMode(COLOR_LED, OUTPUT);
   pinMode(INT0, INPUT);
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
@@ -40,7 +41,7 @@ void setup() {
   pantalla.begin(); 
   indicadores.begin();
   indicadores.patron_inicio();
-  // selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
 }
 
 void loop() {

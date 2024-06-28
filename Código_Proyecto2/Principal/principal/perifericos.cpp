@@ -260,7 +260,7 @@ void OLED::begin() // First time
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
   // calentandoScreen(); // Screen de calentando sensores
-  digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+  //digitalWrite(_enableOLED, LOW); // Apaga la pantalla
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado
@@ -356,7 +356,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
   char lastMode = 'T'; // Initialize last mode
   char finalMode; // Return variable
 
-  wakeUp();
+  //wakeUp();
   lastMode = updateDisplay(lastMode);
   while(1) // Loop hasta que el usuario escoja una opción
   {
@@ -476,32 +476,38 @@ void indicadores::patron_inicio() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
-      //digitalWrite(ON_OFF_VIB, HIGH);
       pixels.show();
       delay(8);
     }
 
+    if (j == 0){
+      digitalWrite(_enableBuzzer, HIGH);
+      digitalWrite(_enableVibrador, HIGH);
+      delay(500);
+    }
+    
     delay(300);
+    digitalWrite(_enableBuzzer, LOW);
+    digitalWrite(_enableVibrador, LOW);
 
-    for(int brightness = 100; brightness >= 0; brightness--) {
+    /*(int brightness = 100; brightness >= 0; brightness--) {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
       //digitalWrite(ON_OFF_VIB, LOW);
       pixels.show();
       delay(8);
-    }
+    }*/
   }
 
   for(int brightness = 100; brightness >= 0; brightness--) {
     for(int i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
     }
-    //digitalWrite(ON_OFF_BUZZER, HIGH);
     pixels.show();
     delay(8);
   }
-  //digitalWrite(ON_OFF_BUZZER, LOW);
+  
   delay(500);
 }
 
