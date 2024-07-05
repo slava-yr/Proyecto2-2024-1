@@ -1,0 +1,89 @@
+const int sensorEnabledPin = 2;
+const int sensorPin = A0;
+const int showDisplayButton = 3;
+const int updateInterval = 120000; // 120 seconds
+const int warmupTime = 30000; // 30 seconds
+const int sleepTime = 60000; // 60 seconds
+
+unsigned long previousUpdateTime = 0;
+unsigned long previousSensorCheckTime = 0;
+bool sensorEnabled = false;
+float lastSensorValue = 0;
+
+void setup() {
+  pinMode(sensorEnabledPin, INPUT);
+  pinMode(sensorPin, INPUT);
+  pinMode(showDisplayButton, INPUT);
+  digitalWrite(sensorEnabledPin, LOW);
+
+  // Initialize the display
+  // ...
+
+  // Display the initial message
+  displayMessage("Sensor warming up");
+
+  // Wait for the sensor to warm up
+  previousSensorCheckTime = millis();
+  while (!sensorEnabled && (millis() - previousSensorCheckTime < warmupTime)) {
+    if (digitalRead(sensorEnabledPin) == HIGH) {
+      sensorEnabled = true;
+    }
+  }
+
+  // Read and update the sensor values
+  if (sensorEnabled) {
+    lastSensorValue = analogRead(sensorPin);
+    displayValue(lastSensorValue);
+  }
+
+  // Turn off the sensor
+  digitalWrite(sensorEnabledPin, LOW);
+}
+
+void loop() {
+  unsigned long currentTime = millis();
+
+  // Check if it's time to update the sensor values
+  if (currentTime - previousUpdateTime >= updateInterval) {
+    previousUpdateTime = currentTime;
+
+    // Turn on the sensor
+    digitalWrite(sensorEnabledPin, HIGH);
+
+    // Wait for the sensor to warm up
+    previousSensorCheckTime = millis();
+    while (!sensorEnabled && (millis() - previousSensorCheckTime < warmupTime)) {
+      if (digitalRead(sensorEnabledPin) == HIGH) {
+        sensorEnabled = true;
+      }
+    }
+
+    // Read and update the sensor values
+    if (sensorEnabled) {
+      lastSensorValue = analogRead(sensorPin);
+      displayValue(lastSensorValue);
+
+      // Turn off the sensor
+      digitalWrite(sensorEnabledPin, LOW);
+
+      // Sleep for a while
+      delay(sleepTime);
+    }
+  }
+
+  // Check if the show display button is pressed
+  if (digitalRead(showDisplayButton) == HIGH) {
+    // Display the current sensor values
+    displayValue(lastSensorValue);
+  }
+}
+
+void displayMessage(String message) {
+  // Display the message on the display
+  // ...
+}
+
+void displayValue(float value) {
+  // Display the value on the display
+  // ...
+}
