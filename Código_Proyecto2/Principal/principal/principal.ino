@@ -43,16 +43,17 @@ void setup() {
   digitalWrite(EN_CO, HIGH);
   digitalWrite(EN_NO2, HIGH);
   
+  unsigned long int startTime = millis();
   indicadores.begin();
   Serial.begin(9600);
   pantalla.begin(); 
   indicadores.patron_inicio();
   selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
-  pantalla.calentandoScreen();
 }
 
 void loop() {
-  
+  pantalla.calentandoScreen();
+  // indicadores.lectura_alta();
   /******** BOSQUEJO DE CÓDIGO PRINCIPAL ***********/ 
   // TOMAR MEDICIONES DE LOS SENSORES Y GUARDARLAS. GUARDAR VALOR PICO
   // EN las mediciones de arriba también hay que incluir la medición de batería.

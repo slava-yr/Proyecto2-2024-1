@@ -21,11 +21,13 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 
 
 // Para los leds
-#define NUMLEDS 8
+#define NUMLEDS 7
 #define COLOR_LED 3 // Pin pwm para el color de los leds
 #define LEDS_DELAY 100
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
 
+// Calentamiento de sensores
+#define TIEMPO_CALENTADO 120000 // 2 minutos en ms
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -255,11 +257,12 @@ void OLED::begin() // First time
   display.clearDisplay();
   display.drawBitmap(0, 0, subterralogo, 128, 64, 1); // Draw subterra logo
   display.display(); // Display it
-  // delay(STARTUP_DELAY); 
+  delay(STARTUP_DELAY); 
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
-  // TODO: Temporizar el calentando screen para que sea el tiempo deseado
-  // calentandoScreen(); // Screen de calentando sensores
-  //digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+  
+  display.clearDisplay();
+  // CALENTAR POR 2 MINUTOS
+  // unsigned long int startTime = millis()  
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado
@@ -311,20 +314,27 @@ void OLED::displayNO2(float measurement)
   display.display();
 }
 
-void OLED::calentandoScreen()
+void OLED::calentandoScreen() // Aprox 9 segundos
 {
-  display.setCursor(0,0);
-  display.setTextSize(2);
-  display.println("Calentando sensores");
-  for (int i = 0; i < 10; i++)
+  long unsigned int startTime = millis();
+  long unsigned int currentTime = startTime;
+
+  if (currentTime - startTime < TIEMPO_CALENTADO)
   {
-    display.print(".");
-    delay(DISPLAY_DELAY/5);
-    display.display();
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.setTextSize(2);
+    display.println("Calentando sensores");
+    for (int i = 0; i < 10; i++)
+    {
+      display.print(".");
+      delay(DISPLAY_DELAY/5);
+      display.display();
+    }
+    currentTime = millis(); // Actualiza el tiempo actual
+    // TODO: Tiempo de estimado de calentar 
   }
-  delay(DISPLAY_DELAY/2);
-  display.clearDisplay();  
-  display.display();
+  
 }
 
 void OLED::displayLecturas(float measurementO2, float measurementCO, float measurementNO2)
