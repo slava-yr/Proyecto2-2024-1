@@ -3,9 +3,8 @@
 #include "perifericos.h"
 
 //Pines para la tira led
-#define COLOR_LED 3   //Pin PWM para el color de los LED
 #define ON_OFF_LED A3 //Pin para habilitar alimentación de los LED
-#define NUMLEDS 8     //Número de LEDs en la tira 
+#define COLOR_LED 3 // Pin pwm para el color de los leds
 
 //Pines de habilitación de alimentación
 #define ON_OFF_BUZZER 4   //Pin habilitador de buzzer
@@ -18,8 +17,7 @@
 #define EN_NO2 9  
 
 //Pin de interrupción
-// CAMBIAR A 2 DE NUEVO, SOLO ES PARA PROBAR
-#define INT0 9// 2//Pin de interrupción
+#define INT0 2
 
 //Pines de lectura del ADC
 #define BAT_VOLT A6 //Pin de lectura de la tensión en la batería
@@ -34,17 +32,27 @@ indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indi
 char selected_mode;
 
 void setup() {
+  pinMode(COLOR_LED, OUTPUT);
   pinMode(INT0, INPUT);
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
+  pinMode(ON_OFF_SENSORES, OUTPUT);
 
+// Alimentar sensores para calentar
+  digitalWrite(ON_OFF_SENSORES, HIGH);
+  digitalWrite(EN_CO, HIGH);
+  digitalWrite(EN_NO2, HIGH);
+  
+  indicadores.begin();
   Serial.begin(9600);
   pantalla.begin(); 
-  indicadores.begin();
+  indicadores.patron_inicio();
   selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  pantalla.calentandoScreen();
 }
 
 void loop() {
+  
   /******** BOSQUEJO DE CÓDIGO PRINCIPAL ***********/ 
   // TOMAR MEDICIONES DE LOS SENSORES Y GUARDARLAS. GUARDAR VALOR PICO
   // EN las mediciones de arriba también hay que incluir la medición de batería.
@@ -53,6 +61,4 @@ void loop() {
     // Si supera, iniciar alarma (2 modos: moderado y alto)
   // REVISAR LA BANDERA DE INTERRUPCIÓN POR BOTÓN
   // Si está alta, imprimir en la pantalla las lecturas actuales y el valor de STEL/TWA 
-  // 
-
 }

@@ -22,9 +22,10 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 
 // Para los leds
 #define NUMLEDS 8
-#define LEDS_PIN 3 // Pin pwm para el color de los leds
+#define COLOR_LED 3 // Pin pwm para el color de los leds
 #define LEDS_DELAY 100
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, LEDS_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
+
 
 const unsigned char pucplogo [] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
@@ -254,12 +255,11 @@ void OLED::begin() // First time
   display.clearDisplay();
   display.drawBitmap(0, 0, subterralogo, 128, 64, 1); // Draw subterra logo
   display.display(); // Display it
-  delay(STARTUP_DELAY); 
-  display.clearDisplay(); // Clear display
+  // delay(STARTUP_DELAY); 
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   // TODO: Temporizar el calentando screen para que sea el tiempo deseado
   // calentandoScreen(); // Screen de calentando sensores
-  digitalWrite(_enableOLED, LOW); // Apaga la pantalla
+  //digitalWrite(_enableOLED, LOW); // Apaga la pantalla
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado
@@ -355,6 +355,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
   char lastMode = 'T'; // Initialize last mode
   char finalMode; // Return variable
 
+  //wakeUp();
   lastMode = updateDisplay(lastMode);
   while(1) // Loop hasta que el usuario escoja una opción
   {
@@ -375,7 +376,7 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
     if (100 < holdTime && holdTime < 500) // Quick press: Change screen
     {
       lastMode = updateDisplay(lastMode);
-      Serial.println(holdTime);
+      // Serial.println(holdTime);
       holdTime = 0;
     }
 
@@ -414,7 +415,7 @@ char OLED::updateDisplay(char lastMode)
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.println("Seleccione: \n\n");
+  display.println("Seleccione el modo de medicion: \n");
   display.setTextSize(5);  
   
   if (lastMode == 'T') // TWA
@@ -431,6 +432,7 @@ char OLED::updateDisplay(char lastMode)
   } 
 
   display.display();
+  delay(600);
   return newMode;
 }
 /* **********************************************************
@@ -449,6 +451,9 @@ void indicadores::begin()
   pinMode(_enableLeds, OUTPUT);
   pinMode(_enableVibrador, OUTPUT);
   pinMode(_enableBuzzer, OUTPUT);
+  digitalWrite(_enableBuzzer, HIGH);
+  delay(400);
+  digitalWrite(_enableBuzzer, LOW);
 }
 
   //controla la intensidad de cada color ingresado(0-100%)y devuelve el comando pixels con la intensidad adecuada
@@ -465,6 +470,7 @@ uint32_t indicadores::color_intensity(uint32_t color, uint8_t scale) {
 //patrón de luces de inicio del dispositivo
 //enciende y apaga atenuando los colores del arreglo colors[]
 void indicadores::patron_inicio() {
+  digitalWrite(_enableLeds, HIGH);
   uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
   int numColors = sizeof(colors) / sizeof(colors[0]);
 
@@ -473,32 +479,38 @@ void indicadores::patron_inicio() {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
-      digitalWrite(_enableVibrador, HIGH);
       pixels.show();
       delay(8);
     }
 
+    if (j == 0){
+      digitalWrite(_enableBuzzer, HIGH);
+      digitalWrite(_enableVibrador, HIGH);
+      delay(500);
+    }
+    
     delay(300);
+    digitalWrite(_enableBuzzer, LOW);
+    digitalWrite(_enableVibrador, LOW);
 
-    for(int brightness = 100; brightness >= 0; brightness--) {
+    /*(int brightness = 100; brightness >= 0; brightness--) {
       for(int i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
-      digitalWrite(_enableVibrador, LOW);
+      //digitalWrite(ON_OFF_VIB, LOW);
       pixels.show();
       delay(8);
-    }
+    }*/
   }
 
   for(int brightness = 100; brightness >= 0; brightness--) {
     for(int i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
     }
-    digitalWrite(_enableBuzzer, HIGH);
     pixels.show();
     delay(8);
   }
-  digitalWrite(_enableBuzzer, LOW);
+  
   delay(500);
 }
 
@@ -574,11 +586,5 @@ void indicadores::lectura_normal() {
   delay(500);
 }
 
-/* **********************************************************
- **********CÓDIGO DEL BOTÓN******************************
- ***********************************************************/
 
-// TODO:
-// * hacer la función de interrupción
-// 
 
