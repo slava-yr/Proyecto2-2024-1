@@ -2,10 +2,10 @@
 
 #define ADC_PIN A0
 #define POWER_PIN 10
-#define CALIBRATION_TIME 3 // Calibration time in minutes
+#define CALIBRATION_TIME 1 // Calibration time in minutes
 
 const float Vcc = 5.0;           // Supply voltage
-const float Rl = 0.82;           // Load resistance in kOhms (820 Ω from the datasheet)
+const float Rl = 10;           // Load resistance in kOhms (820 Ω from the datasheet)
 const float Vadc_max = 1023.0;   // ADC max value (10-bit ADC)
 const float CO_Rs0 = 100.0;      // Typical sensor resistance in clean air for CO (value from the datasheet)
 
@@ -36,7 +36,7 @@ float calculateCOPPM(float Rs) {
 void setup() {
   Serial.begin(115200);
   pinMode(POWER_PIN, OUTPUT);
-  digitalWrite(POWER_PIN, HIGH); // Power on the sensor
+  digitalWrite(POWER_PIN, LOW); // Power on the sensor
 
   while(!Serial);
   

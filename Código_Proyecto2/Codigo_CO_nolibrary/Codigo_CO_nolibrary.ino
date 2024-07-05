@@ -30,8 +30,8 @@ float calculateCOPPM(float Rs) {
 void setup() {
   Serial.begin(115200);
   pinMode(POWER_PIN, OUTPUT);
-  digitalWrite(POWER_PIN, HIGH); // Power on the sensor
-  delay(60000); // Allow the sensor to warm up for 1 minute
+  digitalWrite(POWER_PIN, LOW); // Power on the sensor
+ // delay(); // Allow the sensor to warm up for 1 minute
 }
 
 void loop() {
