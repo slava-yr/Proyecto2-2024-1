@@ -261,8 +261,7 @@ void OLED::begin() // First time
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   
   display.clearDisplay();
-  // CALENTAR POR 2 MINUTOS
-  // unsigned long int startTime = millis()  
+  // CALENTAR POR 2 MINUTOS  
 }
 
 void OLED::wakeUp() // Inicializa tras estar apagado
@@ -355,7 +354,7 @@ void OLED::lowBattery() // Pantalla de batería baja
   delay(STARTUP_DELAY); 
 }
 
-char OLED::selectMode() // Selecciona el modo: TWA o STEL
+char OLED::selectMode() // Selecciona el modo: TWA ('T') o STEL ('S')
 {
   int buttonState = 0; // Current state of the button
   int lastButtonState = 1; // previous state of the button
@@ -365,7 +364,6 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
   char lastMode = 'T'; // Initialize last mode
   char finalMode; // Return variable
 
-  //wakeUp();
   lastMode = updateDisplay(lastMode);
   while(1) // Loop hasta que el usuario escoja una opción
   {
