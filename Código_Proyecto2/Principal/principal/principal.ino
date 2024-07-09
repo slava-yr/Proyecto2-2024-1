@@ -25,6 +25,20 @@
 #define NO2_OUT  A1 //Pin de lectura de valor de sensor NO2
 #define O2_OUT  A2  //Pin de lectura de valor de sensor O2
 
+//VALORES LÍMITE
+#define CO_TWA 25
+#define CO_STEL 200
+#define CO_CEILING 200
+#define NO2_TWA 3
+#define NO2_STEL 5
+#define NO2_CEILING 5
+#define O2_TWA 
+#define O2_STEL
+#define O2_CEILING 
+
+
+
+
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
@@ -49,10 +63,20 @@ void setup() {
   pantalla.begin(); 
   indicadores.patron_inicio();
   selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  if (selected_mode == 'T') // TWA
+  {
+    // Update limits
+
+  }
+  else // STEL
+  {
+
+  }
 }
 
 void loop() {
   pantalla.calentandoScreen();
+  
   // indicadores.lectura_alta();
   /******** BOSQUEJO DE CÓDIGO PRINCIPAL ***********/ 
   // TOMAR MEDICIONES DE LOS SENSORES Y GUARDARLAS. GUARDAR VALOR PICO
