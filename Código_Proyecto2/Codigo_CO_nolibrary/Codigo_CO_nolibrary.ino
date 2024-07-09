@@ -23,14 +23,14 @@ float calculateSensorResistance(float Vrl) {
 float calculateCOPPM(float Rs) {
   // Using the logarithmic relationship provided in the datasheet
   float ratio = Rs / CO_Rs0;
-  float ppm = pow(10, ((log10(ratio) - 0.54) / (-0.47))); // Adjust based on actual datasheet curve
+  float ppm = pow(3.5/ratio, 1.179245283); // Adjust based on actual datasheet curve
   return ppm;
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(POWER_PIN, OUTPUT);
-  digitalWrite(POWER_PIN,LOW); // Power on the sensor
+  digitalWrite(POWER_PIN,HIGH); // Power on the sensor
   delay(200); // Allow the sensor to warm up for 1 minute
 }
 
