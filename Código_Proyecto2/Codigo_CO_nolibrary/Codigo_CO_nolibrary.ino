@@ -19,11 +19,10 @@ float calculateSensorResistance(float Vrl) {
   return Rs;
 }
 
-// Function to calculate CO PPM using the datasheet's characteristic curve
+// Function to calculate CO PPM using the correct formula
 float calculateCOPPM(float Rs) {
-  // Using the logarithmic relationship provided in the datasheet
   float ratio = Rs / CO_Rs0;
-  float ppm = pow(10, ((log10(ratio) - 0.54) / (-0.47))); // Adjust based on actual datasheet curve
+  float ppm = pow((3.5 / ratio), 1.179);
   return ppm;
 }
 
@@ -31,15 +30,18 @@ void setup() {
   Serial.begin(115200);
   pinMode(POWER_PIN, OUTPUT);
   digitalWrite(POWER_PIN, LOW); // Power on the sensor
- // delay(); // Allow the sensor to warm up for 1 minute
+  // delay(); // Allow the sensor to warm up for 1 minute
 }
 
 void loop() {
-  float Vrl = readSensorVoltage(ADC_PIN);
+  int sensorValue = analogRead(ADC_PIN);
+  float Vrl = sensorValue * (Vcc / Vadc_max);
   float Rs = calculateSensorResistance(Vrl);
   float CO_ppm = calculateCOPPM(Rs);
   
-  Serial.print("CO Concentration: ");
+  Serial.print("ADC Value: ");
+  Serial.print(sensorValue);
+  Serial.print(" | CO Concentration: ");
   Serial.print(CO_ppm);
   Serial.println(" PPM");
 
