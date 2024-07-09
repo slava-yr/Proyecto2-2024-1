@@ -2,7 +2,7 @@
 #define POWER_PIN 10
 
 const float Vcc = 5.0;           // Supply voltage
-const float Rl = 10;           // Load resistance in kOhms (820 Ω from the datasheet)
+const float Rl = 10.0;           // Load resistance in kOhms (820 Ω from the datasheet)
 const float Vadc_max = 1023.0;   // ADC max value (10-bit ADC)
 const float NO2_Rs0 = 10.0;      // Typical sensor resistance in clean air for NO2 (value from the datasheet)
 
@@ -21,9 +21,9 @@ float calculateSensorResistance(float Vrl) {
 
 // Function to calculate NO2 PPM using the datasheet's characteristic curve
 float calculateNO2PPM(float Rs) {
-  // Using the logarithmic relationship provided in the datasheet
+  // Using the relationship provided in the datasheet
   float ratio = Rs / NO2_Rs0;
-  float ppm = (3/20) * ratio; // Adjusted based on actual datasheet curve
+  float ppm = (3.0 / 20.0) * ratio; // Adjusted based on actual datasheet curve
   return ppm;
 }
 
@@ -35,11 +35,14 @@ void setup() {
 }
 
 void loop() {
-  float Vrl = readSensorVoltage(ADC_PIN);
+  int sensorValue = analogRead(ADC_PIN);
+  float Vrl = sensorValue * (Vcc / Vadc_max);
   float Rs = calculateSensorResistance(Vrl);
   float NO2_ppm = calculateNO2PPM(Rs);
   
-  Serial.print("NO2 Concentration: ");
+  Serial.print("ADC Value: ");
+  Serial.print(sensorValue);
+  Serial.print(" | NO2 Concentration: ");
   Serial.print(NO2_ppm);
   Serial.println(" PPM");
 
