@@ -1,0 +1,36 @@
+#define ADC_PIN A0
+#define POWER_PIN 10
+
+const float Vcc = 5.0;           // Voltaje de suministro
+const float Rl = 10.0;           // Resistencia de carga en kOhms (820 Ω del datasheet)
+const float Vadc_max = 1023.0;   // Valor máximo del ADC (ADC de 10 bits)
+const float NO2_Rs0 = 10.0;      // Resistencia típica del sensor en aire limpio para NO2 (valor del datasheet)
+
+// Función para leer el voltaje analógico
+float readSensorVoltage(int pin) {
+  int sensorValue = analogRead(pin);
+  float voltage = sensorValue * (Vcc / Vadc_max);
+  return voltage;
+}
+
+// Función para calcular la resistencia del sensor
+float calculateSensorResistance(float Vrl) {
+  float Rs = ((Vcc - Vrl) / Vrl) * Rl;
+  return Rs;
+}
+
+// Función para calcular NO2 PPM usando la curva característica del datasheet
+float calculateNO2PPM(float Rs) {
+  // Usando la relación proporcionada en el datasheet
+  float ratio = Rs / NO2_Rs0;
+  float ppm = (3.0 / 20.0) * ratio; // Ajustado basado en la curva actual del datasheet
+  return ppm;
+}
+
+// Función para obtener PPM de NO2
+float getNO2PPM() {
+  float sensorVoltage = readSensorVoltage(ADC_PIN);
+  float sensorResistance = calculateSensorResistance(sensorVoltage);
+  float no2PPM = calculateNO2PPM(sensorResistance);
+  return no2PPM;
+}

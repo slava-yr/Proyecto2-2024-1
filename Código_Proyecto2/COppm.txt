@@ -1,0 +1,35 @@
+#define ADC_PIN A0
+#define POWER_PIN 10
+
+const float Vcc = 5.0;           // Voltaje de suministro
+const float Rl = 0.82;           // Resistencia de carga en kOhms (820 Ω del datasheet)
+const float Vadc_max = 1023.0;   // Valor máximo del ADC (ADC de 10 bits)
+const float CO_Rs0 = 100.0;      // Resistencia típica del sensor en aire limpio para CO (valor del datasheet)
+
+// Función para leer el voltaje analógico
+float readSensorVoltage(int pin) {
+  int sensorValue = analogRead(pin);
+  float voltage = sensorValue * (Vcc / Vadc_max);
+  return voltage;
+}
+
+// Función para calcular la resistencia del sensor
+float calculateSensorResistance(float Vrl) {
+  float Rs = ((Vcc - Vrl) / Vrl) * Rl;
+  return Rs;
+}
+
+// Función para calcular CO PPM usando la fórmula correcta
+float calculateCOPPM(float Rs) {
+  float ratio = Rs / CO_Rs0;
+  float ppm = pow((3.5 / ratio), 1.179); // Usando la fórmula del datasheet
+  return ppm;
+}
+
+// Función para obtener PPM de CO
+float getCOPPM() {
+  float sensorVoltage = readSensorVoltage(ADC_PIN);
+  float sensorResistance = calculateSensorResistance(sensorVoltage);
+  float coPPM = calculateCOPPM(sensorResistance);
+  return coPPM;
+}

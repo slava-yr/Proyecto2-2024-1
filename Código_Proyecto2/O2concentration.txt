@@ -1,0 +1,20 @@
+const float VRefer = 3.3;       // Voltaje de referencia del ADC
+const int pinAdc = A0;
+
+// Función para leer el voltaje de salida del sensor O2
+float readO2Vout() {
+    long sum = 0;
+    for (int i = 0; i < 32; i++) {
+        sum += analogRead(pinAdc);
+    }
+    sum >>= 5;
+    float MeasuredVout = sum * (VRefer / 1023.0);
+    return MeasuredVout;
+}
+
+// Función para obtener la concentración de O2 en porcentaje
+float getO2Concentration() {
+    float MeasuredVout = readO2Vout();
+    float Concentration_Percentage = (MeasuredVout * 0.21 / 2.0) * 100;
+    return Concentration_Percentage;
+}
