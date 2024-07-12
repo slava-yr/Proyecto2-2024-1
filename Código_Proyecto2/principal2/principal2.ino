@@ -1,5 +1,5 @@
-#include <Adafruit_NeoPixel.h>
-#include <avr/power.h>
+// #include <Adafruit_NeoPixel.h>
+// #include <avr/power.h>
 #include "perifericos.h"
 
 // Pines para la tira led
@@ -49,6 +49,46 @@ const float TWAmax = 20.0; // Valor máximo permitido para TWA en ppm
 
 unsigned long lastMeasurementTime = 0;
 
+// Estructura GasData
+
+struct GasData 
+{
+  float valorPicoRegistrado;
+  const float valorPicoPermitido;
+  float stelCalculado;
+  float twaCalculado;
+  const float stelMax;
+  const float twaMax;
+  float gasMeasurements[maxStelMeasurements];
+  // float twaMeasurements[maxTwaMeasurements];
+
+  // Constructor para inicializar los miembros const
+  GasData(float vpp, float sm, float tm)
+    : valorPicoPermitido(vpp), stelMax(sm), twaMax(tm) {
+      // Inicializa los demás miembros a 0
+      valorPicoRegistrado = 0.0;
+      stelCalculado = 0.0;
+      twaCalculado = 0.0;
+
+      // Inicializa los arrays a 0.0
+      for (int i = 0; i < maxStelMeasurements; i++) {
+        gasMeasurements[i] = 0.0;
+      }
+      /*
+      for (int i = 0; i < maxTwaMeasurements; i++) {
+        twaMeasurements[i] = 0.0;
+      }*/
+    }
+};
+
+GasData gases[] // Gases en este orden: CO, NO2, O2
+// Inicializando las constantes
+{
+  GasData(200.0, 200.0, 25.0),  // CO (pico, stelmax, twamax)
+  GasData(5.0, 5.0, 3.0),      // NO2
+  GasData(22.5, 0.0, 19.5)     // O2
+};
+
 void setup() {
   Serial.begin(9600);
   pinMode(COLOR_LED, OUTPUT);
@@ -66,7 +106,9 @@ void setup() {
   indicadores.begin();
   pantalla.begin();
   indicadores.patron_inicio();
-  selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL
+  selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL (para imprimir)
+  
+
   
   for (int i = 0; i < maxStelMeasurements; i++) {
     gasMeasurements[i] = 0.0;
@@ -78,21 +120,20 @@ void setup() {
 
 void loop() {
   unsigned long currentTime = millis();
-  if (currentTime - lastMeasurementTime >= measurementInterval) {
-    lastMeasurementTime = currentTime;
+  if (currentTime - lastMeasurementTime >= measurementInterval) { // Cada 2 minutos
+    lastMeasurementTime = currentTime; // Actualiza el tiempo 
 
-    // Obtener una nueva medición de gas
-    float newGasData = GasData();
+    // Obtener una nueva medición de cada gas
+    float newGasData = GasData(); 
 
-    // Actualizar el valor pico
+    // Actualizar el valor pico (de cada gas)
     if (newGasData > valorPico) {
       valorPico = newGasData;
-    }
-
-    // Imprimir el valor pico
-    Serial.print("Valor Pico: ");
-    Serial.print(valorPico, 2);
-    Serial.println(" ppm");
+      // Imprimir el valor pico
+      Serial.print("Valor Pico: ");
+      Serial.print(valorPico, 2);
+      Serial.println(" ppm");
+    }    
 
     // Actualizar las mediciones almacenadas para STEL
     gasMeasurements[stelIndex] = newGasData;
@@ -105,7 +146,7 @@ void loop() {
     }
     stel /= maxStelMeasurements;
 
-    // Imprimir el valor de STEL
+    // Imprimir el valor de STEL (quitar)
     Serial.print("STEL: ");
     Serial.print(stel, 2);
     Serial.println(" ppm");
@@ -126,16 +167,22 @@ void loop() {
     }
     twa /= maxTwaMeasurements;
 
-    // Imprimir el valor de TWA
+    // Imprimir el valor de TWA (quitar)
     Serial.print("TWA: ");
     Serial.print(twa, 2);
     Serial.println(" ppm");
 
+
+    // ACTIVACIÓN DE ALARMA
     // Comparar con TWAmax
     if (twa > TWAmax) {
       Serial.println("Activar alarma: TWA excedido!");
     }
   }
+
+
+  // if de bandera de interrupción
+  // Mostrar en la pantalla, etc.
 }
 
 float GasData() {
@@ -143,3 +190,5 @@ float GasData() {
   // En un caso real, esta función obtendría datos del sensor
   return random(10, 50); // Devuelve un valor aleatorio entre 10 y 50 ppm
 }
+
+// TODO: Función de interrupción
