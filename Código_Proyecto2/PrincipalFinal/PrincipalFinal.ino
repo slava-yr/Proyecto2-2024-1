@@ -25,14 +25,15 @@
 #define NO2_OUT  A1 // Pin de lectura de valor de sensor NO2
 #define O2_OUT  A2  // Pin de lectura de valor de sensor O2
 
-#define measurementInterval 120000
+#define measurementInterval 3000 // 120000 // 2 minutos en ms
 #define maxStelMeasurements 8
 #define maxTwaMeasurements 240 
-
+#define NUM_GASES 3 // Solo para debugear, quitar después
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
 
+int program_counter = 0; // PARA DEBUG. BORRAR 
 char selected_mode; // TWA o STEL
 
 uint8_t stelIndex = 0; // Índice circular para STEL
@@ -81,6 +82,8 @@ GasData gases[] // Gases en este orden: CO, NO2, O2
   GasData(22.5, 0.0, 19.5)     // O2
 };
 
+float newGasData[3];
+
 void setup() {
   Serial.begin(9600);
   pinMode(COLOR_LED, OUTPUT);
@@ -95,25 +98,38 @@ void setup() {
   digitalWrite(EN_NO2, HIGH);
 
   unsigned long int startTime = millis();
+  /*
   indicadores.begin();
   pantalla.begin();
   indicadores.patron_inicio();
   selected_mode = pantalla.selectMode(); // El usuario selecciona TWA o STEL (para imprimir)
+  */
+  selected_mode = 'T';
 }
 
 void loop() {
   unsigned long currentTime = millis();
   if (currentTime - lastMeasurementTime >= measurementInterval) { // Cada 2 minutos
+    program_counter+=1;
     lastMeasurementTime = currentTime; // Actualiza el tiempo 
-
+    Serial.println(program_counter);
     // Obtener una nueva medición de cada gas
-    float newGasData = GasData(); 
+    for (uint8_t i = 0; i < NUM_GASES; i++)
+    {
+      newGasData[i] = GasData();
+      Serial.print("GasData ");
+      Serial.print(i);
+      Serial.print(" : ");
+      Serial.println(newGasData[i]);
+    }
+     
+    
 
     // Actualizar el valor pico (de cada gas)
-    for (uint8_t i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < NUM_GASES; i++)
     {
-      if (newGasData > gases[i].valorPicoRegistrado) {
-        gases[i].valorPicoRegistrado = newGasData;
+      if (newGasData[i] > gases[i].valorPicoRegistrado) {
+        gases[i].valorPicoRegistrado = newGasData[i];
         // Imprimir el valor pico
         Serial.print("Valor Pico: ");
         Serial.print(gases[i].valorPicoRegistrado, 2);
@@ -124,10 +140,10 @@ void loop() {
     if (selected_mode == 'S') // STEL seleccionado
     {
       Serial.println("STEL");
-      for (uint8_t j = 0; j < 3; j++) // Realiza el cálculo de stel para los 3 gases
+      for (uint8_t j = 0; j < NUM_GASES; j++) // Realiza el cálculo de stel para los 3 gases
       {
         // Actualizar las mediciones almacenadas para STEL
-        gases[j].gasMeasurements[stelIndex] = newGasData;
+        gases[j].gasMeasurements[stelIndex] = newGasData[j];
       
         // Calcular el STEL
         gases[j].stelCalculado = 0.0;
@@ -152,9 +168,9 @@ void loop() {
     else // TWA seleccionado
     {
       Serial.println("TWA");
-      for (uint8_t j = 0; j < 3; j++)
+      for (uint8_t j = 0; j < NUM_GASES; j++) // Calcula TWA para los 3 gases
       {
-        gases[j].twaSum += newGasData;
+        gases[j].twaSum += newGasData[j];
         
         if (twaCount > maxTwaMeasurements)
         {
@@ -164,11 +180,11 @@ void loop() {
         gases[j].twaAvg = gases[j].twaSum / min(twaCount, maxTwaMeasurements);
         // Actualizar TWA usando el promedio móvil exponencial (EMA)
         if (isFirstTwaMeasurement) {
-          gases[j].twaEMA = newGasData;
+          gases[j].twaEMA = newGasData[j];
           if (j == 2) isFirstTwaMeasurement = false; // Solo actualiza cuando estén los 3 gases
         } 
         else {
-          gases[j].twaEMA = alpha * newGasData + (1 - alpha) * gases[j].twaEMA;
+          gases[j].twaEMA = alpha * newGasData[j] + (1 - alpha) * gases[j].twaEMA;
         }
         gases[j].twaValue = (twaCount <= maxTwaMeasurements) ? gases[j].twaAvg : gases[j].twaEMA;
         
@@ -181,6 +197,7 @@ void loop() {
           Serial.println("Activar alarma: TWA excedido!");
         }
       }
+      twaCount++; // Aumenta la cuenta del twa
     } 
   }
 
