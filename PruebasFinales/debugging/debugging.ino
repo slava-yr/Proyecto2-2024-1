@@ -33,6 +33,8 @@
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
 
+volatile bool buttonPressed = false; // Botón de interrupción presionado
+
 // Estructura GasData
 struct Gas 
 {
@@ -103,32 +105,31 @@ void loop() {
   unsigned long int lastMeasurementTime = 0;
   bool isFirstTwaMeasurement = true; // Indicador para la primera medición TWA
   const float alpha = 2.0 / (240 + 1); // Factor de suavizado para el EMA
-  bool buttonPressed; // Botón de interrupción presionado
 
   char selected_mode = pantalla.selectMode();
-
   // Gases en este orden: CO, NO2, O2
   Gas gases[3] = {
     Gas(50.0, 100.0, 200.0),
     Gas(60.0, 110.0, 210.0),
     Gas(70.0, 120.0, 220.0)
   };
-  /*
+  attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING);
   while(1)
   {
+    /*
     unsigned long int currentTime = millis();
     if (currentTime - lastMeasurementTime >= measurementInterval) { // Cada 2 minutos
       program_counter+=1;
       lastMeasurementTime = currentTime; // Actualiza el tiempo 
-      Serial.println(program_counter);
+      //Serial.println(program_counter);
       // Obtener una nueva medición de cada gas
       for (uint8_t i = 0; i < NUM_GASES; i++)
       {
         newGasData[i] = GasData();
-        Serial.print("GasData ");
-        Serial.print(i);
-        Serial.print(" : ");
-        Serial.println(newGasData[i]);
+        //Serial.print("GasData ");
+        //Serial.print(i);
+        //Serial.print(" : ");
+        //Serial.println(newGasData[i]);
       }
       // Actualizar el valor pico (de cada gas)
       for (uint8_t i = 0; i < NUM_GASES; i++)
@@ -136,15 +137,14 @@ void loop() {
         if (newGasData[i] > gases[i].valorPicoRegistrado) {
           gases[i].valorPicoRegistrado = newGasData[i];
           // Imprimir el valor pico
-          Serial.print("Valor Pico: ");
-          Serial.print(gases[i].valorPicoRegistrado, 2);
-          Serial.println(" ppm");
+          //Serial.print("Valor Pico: ");
+          //Serial.print(gases[i].valorPicoRegistrado, 2);
+          //Serial.println(" ppm");
         }    
       }
-    /*
       if (selected_mode == 'S') // STEL seleccionado
       {
-        Serial.println("STEL");
+        //Serial.println("STEL");
         for (uint8_t j = 0; j < NUM_GASES; j++) // Realiza el cálculo de stel para los 3 gases
         {
           // Actualizar las mediciones almacenadas para STEL
@@ -157,21 +157,22 @@ void loop() {
           }
           gases[j].stelCalculado /= maxStelMeasurements;
 
-          Serial.print("STEL: ");
-          Serial.print(gases[j].stelCalculado, 2);
-          Serial.println(" ppm");
+          //Serial.print("STEL: ");
+          //Serial.print(gases[j].stelCalculado, 2);
+          //Serial.println(" ppm");
 
           // Activación de alarma
           if (gases[j].stelCalculado > gases[j].stelMax) {
-            Serial.println("Activar alarma: STEL excedido!");
+            //Serial.println("Activar alarma: STEL excedido!");
           }
         }
         // Actualiza el índice 
         stelIndex = (stelIndex + 1) % maxStelMeasurements; // Índice circular
       }
+
       else // TWA seleccionado
       {
-        Serial.println("TWA");
+        //Serial.println("TWA");
         for (uint8_t j = 0; j < NUM_GASES; j++) // Calcula TWA para los 3 gases
         {
           gases[j].twaSum += newGasData[j];
@@ -192,28 +193,35 @@ void loop() {
           }
           gases[j].twaValue = (twaCount <= maxTwaMeasurements) ? gases[j].twaAvg : gases[j].twaEMA;
           
-          Serial.print("TWA: ");
-          Serial.print(gases[j].twaValue, 2);
-          Serial.println(" ppm");
+          //Serial.print("TWA: ");
+          //Serial.print(gases[j].twaValue, 2);
+          //Serial.println(" ppm");
 
           // ACTIVACIÓN DE ALARMA
           if (gases[j].twaValue > gases[j].twaMax) {
-            Serial.println("Activar alarma: TWA excedido!");
+            //Serial.println("Activar alarma: TWA excedido!");
           }
         }
         twaCount++; // Aumenta la cuenta del twa
       }
-    }
-    */
+    }*/
+    
     if (buttonPressed == true) // Se presionó el botón 
     {
       buttonPressed = false; // Actualiza el estado
-      pantalla.displayLecturas(newGasData[0], newGasData[1], newGasData[2]);
+      // pantalla.displayLecturas(newGasData[0], newGasData[1], newGasData[2]);
     } 
   }
+}
 
 float GasData() {
   // Simulación de una función que devuelve un valor de gas medido
   // En un caso real, esta función obtendría datos del sensor
   return random(10, 50); // Devuelve un valor aleatorio entre 10 y 50 ppm
+}
+
+void onButtonPress()
+{
+  buttonPressed = true;
+  digitalWrite(ON_OFF_VIB, HIGH);
 }

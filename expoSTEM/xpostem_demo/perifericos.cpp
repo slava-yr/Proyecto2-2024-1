@@ -17,7 +17,7 @@
 #define DELTAY 2
 Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define STARTUP_DELAY 500 // Time for the startup screens
-#define DISPLAY_DELAY 5000 // Time for each measurement
+#define DISPLAY_DELAY 3000 // Time for each measurement
 
 
 // Para los leds
@@ -27,7 +27,7 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
 
 // Calentamiento de sensores
-#define TIEMPO_CALENTADO 120000 // 2 minutos en ms
+#define TIEMPO_CALENTADO 12000 // 12 segundos //120000 // 2 minutos en ms
 
 
 const unsigned char pucplogo [] PROGMEM = {
@@ -193,9 +193,9 @@ void OLED::begin() // First time
   display.setTextColor(SH110X_WHITE); // Set text color for writing 
   
   display.clearDisplay();
-  // CALENTAR POR 2 MINUTOS
 }
 
+/*
 void OLED::wakeUp() // Inicializa tras estar apagado
 {
   digitalWrite(_enableOLED, HIGH);
@@ -203,7 +203,7 @@ void OLED::wakeUp() // Inicializa tras estar apagado
   display.begin(i2c_Address, true); // Address 0x3C default
   display.clearDisplay(); 
   display.setTextColor(SH110X_WHITE);
-}
+}*/
 
 void OLED::displayO2(float measurement)
 {
@@ -250,7 +250,7 @@ void OLED::calentandoScreen() // Aprox 9 segundos
   long unsigned int startTime = millis();
   long unsigned int currentTime = startTime;
 
-  if (currentTime - startTime < TIEMPO_CALENTADO)
+  while (currentTime - startTime < TIEMPO_CALENTADO)
   {
     display.clearDisplay();
     display.setCursor(0,0);
@@ -263,17 +263,17 @@ void OLED::calentandoScreen() // Aprox 9 segundos
       display.display();
     }
     currentTime = millis(); // Actualiza el tiempo actual
-    // TODO: Tiempo de estimado de calentar 
   }
-  
+  display.clearDisplay();
+  display.display();
 }
 
 void OLED::displayLecturas(float measurementO2, float measurementCO, float measurementNO2)
 {
+  display.clearDisplay();
   displayO2(measurementO2);
   displayCO(measurementCO);
   displayNO2(measurementNO2);
-  digitalWrite(_enableOLED, LOW); // Apaga la pantalla tras mostrar las lecturas 
 }
 
 /*
