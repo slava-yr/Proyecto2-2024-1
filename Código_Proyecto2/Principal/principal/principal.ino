@@ -36,10 +36,6 @@
 #define O2_STEL
 #define O2_CEILING 
 
-
-
-
-
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
 
