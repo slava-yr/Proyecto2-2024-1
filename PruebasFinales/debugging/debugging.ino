@@ -69,6 +69,7 @@ void setup() {
   digitalWrite(EN_CO, HIGH);
   digitalWrite(EN_NO2, HIGH);
 
+  
   indicadores.begin(); // Inicializa los indicadores
   digitalWrite(ON_OFF_BUZZER, HIGH);
   digitalWrite(ON_OFF_LED, HIGH);
@@ -185,6 +186,8 @@ void loop() {
     if (buttonPressed == true) // Se presionó el botón 
     {
       pantalla.displayLecturas(gases[0].gasMeasurements[stelIndex-1], gases[1].gasMeasurements[stelIndex-1], gases[2].gasMeasurements[stelIndex-1]); // Mostrar las lecturas
+      // Display STEL
+      // pantalla.displayLecturas(gases[0].stelCalculado, gases[1].stelCalculado, gases[2].stelCalculado);
       buttonPressed = false;
     } 
 }
