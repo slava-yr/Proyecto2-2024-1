@@ -86,8 +86,9 @@ void loop() {
   Con 34% funciona
   Buscar formas de reducir el consumo de memoria.
   */
+  char selected_mode = pantalla.selectMode();
+  pantalla.calentandoScreen(); // Dos veces
 
-  
   uint8_t program_counter = 0; // PARA DEBUG. BORRAR 
   uint8_t stelIndex = 0; // Índice circular para STEL
   // uint8_t twaCount = 0; // Conteo de mediciones para TWA
@@ -96,13 +97,14 @@ void loop() {
   // bool isFirstTwaMeasurement = true; // Indicador para la primera medición TWA
   // const float alpha = 2.0 / (240 + 1); // Factor de suavizado para el EMA
 
-  char selected_mode = pantalla.selectMode();
+  
   // Gases en este orden: CO, NO2, O2
   Gas gases[3] = {
     Gas(50.0, 100.0),
     Gas(60.0, 110.0),
     Gas(70.0, 120.0)
   };
+  
   attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING);
   while(1)
   {
