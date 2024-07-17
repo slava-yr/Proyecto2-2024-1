@@ -71,21 +71,21 @@ void loop() {
       lastMeasurementTime = currentTime; // Actualiza el tiempo
 
       // Tomar lecturas  
-      CO = GasData();
-      NO2 = GasData();
-      O2 = GasData();      
+      CO = GasData(10, 200);
+      NO2 = GasData(1, 5);
+      O2 = GasData(10, 22);   
 
     }
     if (buttonPressed == true) // Si se presiona el botón
     {
-      pantalla.displayLecturas(CO, NO2, O2); // Mostrar las lecturas
+      pantalla.displayLecturas(O2, CO, NO2); // Mostrar las lecturas
       buttonPressed = false;
     }
   }
 }
 
-float GasData() {
-  return random(10, 50); // Devuelve un valor aleatorio entre 10 y 50 ppm
+float GasData(uint8_t min, uint8_t max) {
+  return random(min*10, max*10)/10.0; // Devuelve un valor aleatorio entre 10 y 50 ppm
 }
 
 void onButtonPress() { // Cuando se presiona el botón

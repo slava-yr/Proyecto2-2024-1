@@ -176,7 +176,6 @@ OLED::OLED(uint8_t enablePinOLED, uint8_t interruptPin)
 }
 
 void OLED::begin() // First time 
-// Se apaga después del begin. Debes llamar el wakeup y luego lo que quieras hacer.
 {
   pinMode(_enableOLED, OUTPUT); // Control pin for OLED
   digitalWrite(_enableOLED, HIGH); // Enable OLED 
@@ -263,9 +262,7 @@ void OLED::calentandoScreen() // Aprox 9 segundos
       display.display();
     }
     currentTime = millis(); // Actualiza el tiempo actual
-    // TODO: Tiempo de estimado de calentar 
-  }
-  
+  } 
 }
 
 void OLED::displayLecturas(float measurementO2, float measurementCO, float measurementNO2)
@@ -273,26 +270,15 @@ void OLED::displayLecturas(float measurementO2, float measurementCO, float measu
   displayO2(measurementO2);
   displayCO(measurementCO);
   displayNO2(measurementNO2);
-  digitalWrite(_enableOLED, LOW); // Apaga la pantalla tras mostrar las lecturas 
+  // digitalWrite(_enableOLED, LOW); // Apaga la pantalla tras mostrar las lecturas 
 }
-
-/*
-void OLED::lowBattery() // Pantalla de batería baja
-{
-  display.drawBitmap(0, 0, lowBatteryIcon, 128, 64, 1);
-  display.display();
-  delay(STARTUP_DELAY); 
-  display.clearDisplay();
-  display.display();
-  delay(STARTUP_DELAY); 
-}*/
 
 char OLED::selectMode() // Selecciona el modo: TWA o STEL
 {
-  int buttonState = 0; // Current state of the button
-  int lastButtonState = 1; // previous state of the button
-  int startPressed = 0;    // the moment the button was pressed
-  int endPressed = 0;      // the moment the button was released
+  bool buttonState = 0; // Current state of the button
+  bool lastButtonState = 1; // previous state of the button
+  long unsigned int startPressed = 0;    // the moment the button was pressed
+  long unsigned int endPressed = 0;      // the moment the button was released
   unsigned long int holdTime = 0;        // how long the button was hold
   char lastMode = 'T'; // Initialize last mode
   char finalMode; // Return variable
@@ -409,11 +395,11 @@ uint32_t indicadores::color_intensity(uint32_t color, uint8_t scale) {
 void indicadores::patron_inicio() {
   digitalWrite(_enableLeds, HIGH);
   uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
-  int numColors = sizeof(colors) / sizeof(colors[0]);
+  uint8_t numColors = sizeof(colors) / sizeof(colors[0]);
 
-  for(int j = 0; j < numColors; j++) {
-    for(int brightness = 0; brightness <= 100; brightness++) {
-      for(int i = 0; i < NUMLEDS; i++) {
+  for(uint8_t j = 0; j < numColors; j++) {
+    for(uint8_t brightness = 0; brightness <= 100; brightness++) {
+      for(uint8_t i = 0; i < NUMLEDS; i++) {
         pixels.setPixelColor(i, color_intensity(colors[j], brightness));
       }
       pixels.show();
@@ -440,8 +426,8 @@ void indicadores::patron_inicio() {
     }*/
   }
 
-  for(int brightness = 100; brightness >= 0; brightness--) {
-    for(int i = 0; i < NUMLEDS; i++) {
+  for(uint8_t brightness = 100; brightness >= 0; brightness--) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
     }
     pixels.show();
@@ -452,8 +438,8 @@ void indicadores::patron_inicio() {
 }
 
 void indicadores::lectura_alta() {
-  for (int i = 0; i < 10; i++) {
-    for(int i = 0; i < NUMLEDS; i++) {
+  for (uint8_t i = 0; i < 10; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, color_intensity(pixels.Color(255, 0, 0), 90));
     }
     pixels.show();
@@ -476,8 +462,8 @@ void indicadores::lectura_alta() {
 }
 
 void indicadores::lectura_moderada() {
-  for (int i = 0; i < 10; i++) {
-    for(int i = 0; i < NUMLEDS; i++) {
+  for (uint8_t i = 0; i < 10; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, color_intensity(pixels.Color(255, 191, 0), 90));
     }
     pixels.show();
@@ -485,7 +471,7 @@ void indicadores::lectura_moderada() {
     digitalWrite(_enableBuzzer, HIGH);
     delay(300);
 
-    for(int i = 0; i < NUMLEDS; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
     }
     pixels.show();
@@ -493,15 +479,15 @@ void indicadores::lectura_moderada() {
     digitalWrite(_enableBuzzer, LOW);
     delay(300);
   }
-  for(int i = 0; i < NUMLEDS; i++) {
+  for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(0, 0, 0));
   }
   delay(300);
 }
 
 void indicadores::lectura_normal() {
-  for (int i = 0; i < 3; i++) {
-    for(int i = 0; i < NUMLEDS; i++) {
+  for (uint8_t i = 0; i < 3; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, color_intensity(pixels.Color(0, 255, 0), 90));
     }
     pixels.show();
@@ -509,7 +495,7 @@ void indicadores::lectura_normal() {
     digitalWrite(_enableBuzzer, HIGH);
     delay(500);
 
-    for(int i = 0; i < NUMLEDS; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
     }
     pixels.show();
@@ -517,7 +503,7 @@ void indicadores::lectura_normal() {
     digitalWrite(_enableBuzzer, LOW);
     delay(500);
   }
-  for(int i = 0; i < NUMLEDS; i++) {
+  for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(0, 0, 0));
   }
   delay(500);

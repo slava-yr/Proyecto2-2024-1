@@ -1,5 +1,3 @@
-#include <Adafruit_NeoPixel.h>
-#include <avr/power.h>
 #include "perifericos.h"
 
 // Pines para la tira led
@@ -27,7 +25,7 @@
 
 #define measurementInterval 3000 // 120000 // 2 minutos en ms
 #define maxStelMeasurements 8
-#define maxTwaMeasurements 240 
+// #define maxTwaMeasurements 240 
 #define NUM_GASES 3 // Solo para debugear, quitar después
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
@@ -41,24 +39,15 @@ struct Gas
   float valorPicoRegistrado;
   const float valorPicoPermitido;
   float stelCalculado;
-  float twaSum;
-  float twaAvg; 
-  float twaEMA; 
-  float twaValue;
   const float stelMax;
-  const float twaMax;
   float gasMeasurements[maxStelMeasurements];
 
   // Constructor para inicializar los miembros const
-  Gas(float vpp, float sm, float tm)
-    : valorPicoPermitido(vpp), stelMax(sm), twaMax(tm) {
+  Gas(float vpp, float sm)
+    : valorPicoPermitido(vpp), stelMax(sm) {
       // Inicializa los demás miembros a 0
       valorPicoRegistrado = 0.0;
       stelCalculado = 0.0;
-      twaSum = 0.0;
-      twaAvg = 0.0;
-      twaEMA = 0.0;
-      twaValue = 0.0;
       // Inicializa los arrays a 0.0
       for (int i = 0; i < maxStelMeasurements; i++) {
         gasMeasurements[i] = 0.0;
@@ -80,12 +69,13 @@ void setup() {
   digitalWrite(EN_CO, HIGH);
   digitalWrite(EN_NO2, HIGH);
 
-  indicadores.begin();
+  
+  indicadores.begin(); // Inicializa los indicadores
   digitalWrite(ON_OFF_BUZZER, HIGH);
   digitalWrite(ON_OFF_LED, HIGH);
   digitalWrite(ON_OFF_VIB, HIGH);
-  indicadores.patron_inicio();
-  pantalla.begin();
+  indicadores.patron_inicio(); // Prender los leds, vibrador y buzzer en un patrón 
+  pantalla.begin(); // Inicia la pantalla (imprime logo PUCP y subterrasafe)
 }
 
 
@@ -96,82 +86,68 @@ void loop() {
   Con 34% funciona
   Buscar formas de reducir el consumo de memoria.
   */
+  char selected_mode = pantalla.selectMode();
+  pantalla.calentandoScreen(); // Dos veces
 
-  
   uint8_t program_counter = 0; // PARA DEBUG. BORRAR 
   uint8_t stelIndex = 0; // Índice circular para STEL
-  uint8_t twaCount = 0; // Conteo de mediciones para TWA
+  // uint8_t twaCount = 0; // Conteo de mediciones para TWA
 
   unsigned long int lastMeasurementTime = 0;
-  bool isFirstTwaMeasurement = true; // Indicador para la primera medición TWA
-  const float alpha = 2.0 / (240 + 1); // Factor de suavizado para el EMA
+  // bool isFirstTwaMeasurement = true; // Indicador para la primera medición TWA
+  // const float alpha = 2.0 / (240 + 1); // Factor de suavizado para el EMA
 
-  char selected_mode = pantalla.selectMode();
+  
   // Gases en este orden: CO, NO2, O2
   Gas gases[3] = {
-    Gas(50.0, 100.0, 200.0),
-    Gas(60.0, 110.0, 210.0),
-    Gas(70.0, 120.0, 220.0)
+    Gas(50.0, 100.0),
+    Gas(60.0, 110.0),
+    Gas(70.0, 120.0)
   };
+  
   attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING);
   while(1)
   {
-    /*
     unsigned long int currentTime = millis();
     if (currentTime - lastMeasurementTime >= measurementInterval) { // Cada 2 minutos
-      program_counter+=1;
+      // program_counter+=1;
       lastMeasurementTime = currentTime; // Actualiza el tiempo 
-      //Serial.println(program_counter);
       // Obtener una nueva medición de cada gas
       for (uint8_t i = 0; i < NUM_GASES; i++)
       {
         newGasData[i] = GasData();
-        //Serial.print("GasData ");
-        //Serial.print(i);
-        //Serial.print(" : ");
-        //Serial.println(newGasData[i]);
       }
       // Actualizar el valor pico (de cada gas)
       for (uint8_t i = 0; i < NUM_GASES; i++)
       {
         if (newGasData[i] > gases[i].valorPicoRegistrado) {
           gases[i].valorPicoRegistrado = newGasData[i];
-          // Imprimir el valor pico
-          //Serial.print("Valor Pico: ");
-          //Serial.print(gases[i].valorPicoRegistrado, 2);
-          //Serial.println(" ppm");
         }    
       }
       if (selected_mode == 'S') // STEL seleccionado
       {
-        //Serial.println("STEL");
         for (uint8_t j = 0; j < NUM_GASES; j++) // Realiza el cálculo de stel para los 3 gases
         {
-          // Actualizar las mediciones almacenadas para STEL
           gases[j].gasMeasurements[stelIndex] = newGasData[j];
         
-          // Calcular el STEL
           gases[j].stelCalculado = 0.0;
           for (int i = 0; i < maxStelMeasurements; i++) {
             gases[j].stelCalculado += gases[j].gasMeasurements[i];
           }
           gases[j].stelCalculado /= maxStelMeasurements;
 
-          //Serial.print("STEL: ");
-          //Serial.print(gases[j].stelCalculado, 2);
-          //Serial.println(" ppm");
-
           // Activación de alarma
           if (gases[j].stelCalculado > gases[j].stelMax) {
-            //Serial.println("Activar alarma: STEL excedido!");
+            // ACTIVAR ALARMA
           }
         }
         // Actualiza el índice 
         stelIndex = (stelIndex + 1) % maxStelMeasurements; // Índice circular
       }
-
+      
       else // TWA seleccionado
       {
+        /*
         //Serial.println("TWA");
         for (uint8_t j = 0; j < NUM_GASES; j++) // Calcula TWA para los 3 gases
         {
@@ -201,18 +177,23 @@ void loop() {
           if (gases[j].twaValue > gases[j].twaMax) {
             //Serial.println("Activar alarma: TWA excedido!");
           }
+          
         }
         twaCount++; // Aumenta la cuenta del twa
+        */
       }
-    }*/
+    }
+  }
     
     if (buttonPressed == true) // Se presionó el botón 
     {
-      buttonPressed = false; // Actualiza el estado
-      // pantalla.displayLecturas(newGasData[0], newGasData[1], newGasData[2]);
+      pantalla.displayLecturas(gases[0].gasMeasurements[stelIndex-1], gases[1].gasMeasurements[stelIndex-1], gases[2].gasMeasurements[stelIndex-1]); // Mostrar las lecturas
+      // Display STEL
+      // pantalla.displayLecturas(gases[0].stelCalculado, gases[1].stelCalculado, gases[2].stelCalculado);
+      buttonPressed = false;
     } 
-  }
 }
+
 
 float GasData() {
   // Simulación de una función que devuelve un valor de gas medido
@@ -223,5 +204,4 @@ float GasData() {
 void onButtonPress()
 {
   buttonPressed = true;
-  digitalWrite(ON_OFF_VIB, HIGH);
 }
