@@ -1,15 +1,15 @@
 #define ADC_PIN A0
 #define POWER_PIN 10
 
-const float Vcc = 5.0;           // Supply voltage
+const int Vcc = 5;           // Supply voltage
 const float Rl = 0.82;           // Load resistance in kOhms (820 Ω from the datasheet)
-const float Vadc_max = 1023.0;   // ADC max value (10-bit ADC)
+const int Vadc_max = 1023;   // ADC max value (10-bit ADC)
 const float CO_Rs0 = 100.0;      // Typical sensor resistance in clean air for CO (value from the datasheet)
 
 // Function to read the analog voltage
 float readSensorVoltage(int pin) {
   int sensorValue = analogRead(pin);
-  float voltage = sensorValue * (Vcc / Vadc_max);
+  float voltage = sensorValue * float(Vcc / Vadc_max);
   return voltage;
 }
 

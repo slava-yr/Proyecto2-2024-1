@@ -24,6 +24,7 @@ float calculateSensorResistance(float Vrl, float Rl) {
   return Rs;
 }
 
+
 //FUNCIONES CO 
 // Función para calcular CO PPM usando la fórmula correcta
 
