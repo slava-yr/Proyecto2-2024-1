@@ -1,3 +1,11 @@
+/*----------------------------------------
+DEMO FINAL PARA LA PRESENTACIÓN
+- Mostrar selección de modo
+- Interrupción por botón
+- Imprimir "mediciones" actuales
+- Alarma cuando se superen los valores pico (ACTUALIZARLOS)
+
+-----------------------------------------*/
 #include "perifericos.h"
 
 // Pines para la tira led
@@ -10,10 +18,6 @@
 #define ON_OFF_SENSORES 7 // Pin que controla la alimentación de los sensores
 #define ON_OFF_VIB 10     // Pin habilitador de vibrador
 
-// Pines para habilitación de sensores (solo NO2 y CO)
-#define EN_CO 8
-#define EN_NO2 9  
-
 // Pin de interrupción
 #define INT0 2
 
@@ -23,22 +27,11 @@
 #define NO2_OUT  A1 // Pin de lectura de valor de sensor NO2
 #define O2_OUT  A2  // Pin de lectura de valor de sensor O2
 
-#define measurementInterval 3000 // 120000 // 2 minutos en ms
-#define maxStelMeasurements 8
-// #define maxTwaMeasurements 240 
-#define NUM_GASES 2 // Solo para debugear, quitar después
+#define measurementInterval 6000 // 120000 // 2 minutos en ms
+#define NUM_GASES 3 // Solo para debugear, quitar después
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
-
-
-//Constantes de gases
-/*
-#define CO_PICO
-#define NO2_PICO
-#define CO_STEL
-#define NO2_STEL
-*/
 
 volatile bool buttonPressed = false; // Botón de interrupción presionado
 
@@ -46,37 +39,21 @@ volatile bool buttonPressed = false; // Botón de interrupción presionado
 struct Gas 
 {
   float newGasData;
-  float stelCalculado;
-  const float stelMax;
-  float gasMeasurements[maxStelMeasurements];
+  const float picoMax;
+  float picoRegistrado;
 
   // Constructor para inicializar los miembros const
-    Gas(float max) : stelMax(max) {
+    Gas(float max) : picoMax(max) {
       // Inicializa los demás miembros a 0
       newGasData = 0.0;
-      stelCalculado = 0.0;
-
-      // Inicializa los arrays a 0.0
-      for (uint8_t i = 0; i < maxStelMeasurements; i++) {
-        gasMeasurements[i] = 0.0;
-      }
+      picoRegistrado = 0.0;
     }
 };
 
-
 void setup() {
-  // Serial.begin(9600);
+  // put your setup code here, to run once:
   pinMode(COLOR_LED, OUTPUT);
   pinMode(INT0, INPUT);
-  pinMode(EN_CO, OUTPUT);
-  pinMode(EN_NO2, OUTPUT);
-  pinMode(ON_OFF_SENSORES, OUTPUT);
-
-  // Alimentar sensores para calentar
-  digitalWrite(ON_OFF_SENSORES, HIGH);
-  digitalWrite(EN_CO, HIGH);
-  digitalWrite(EN_NO2, HIGH);
-
   
   indicadores.begin(); // Inicializa los indicadores
   digitalWrite(ON_OFF_BUZZER, HIGH);
@@ -86,23 +63,20 @@ void setup() {
   pantalla.begin(); // Inicia la pantalla (imprime logo PUCP y subterrasafe)
 }
 
-uint8_t i = 0; // Variable para fors
 void loop() {
-
   char selected_mode = pantalla.selectMode();
   pantalla.calentandoScreen(); // Dos veces
   
   uint8_t stelIndex = 0; // Índice circular para STEL
-
   unsigned long int lastMeasurementTime = 0;
   
   // Gases en este orden: CO, NO2, O2
   Gas gases[NUM_GASES] = {
     Gas(200.0),   // CO
     Gas(5.0),   // NO2
-    // Gas(20.0)    // O2
+    Gas(20.0)    // O2
   };
-  
+
   attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING);
   while(1)
   {
@@ -111,38 +85,22 @@ void loop() {
     if (currentTime - lastMeasurementTime >= measurementInterval) { // Cada 2 minutos
       
       lastMeasurementTime = currentTime; // Actualiza el tiempo 
-      
+
       for (i = 0; i < NUM_GASES; i++)
       {
-        gases[i].newGasData = GasData();
-      }
-            
-      if (selected_mode == 'S') // STEL seleccionado
-      {
-        for (uint8_t j = 0; j < NUM_GASES; j++) // Realiza el cálculo de stel para los 3 gases
+        gases[i].newGasData = GasData(); // Genera un nuevo dato
+        if (gases[i].newGasData > gases[j].picoRegistrado) // Actualiza el valor pico
         {
-          gases[j].gasMeasurements[stelIndex] = gases[j].newGasData;
-        
-          gases[j].stelCalculado = 0.0;
-          for (i = 0; i < maxStelMeasurements; i++) {
-            gases[j].stelCalculado += gases[j].gasMeasurements[i];
-          }
-          gases[j].stelCalculado /= maxStelMeasurements;
-
-          // Activación de alarma
-          
-          if (gases[j].stelCalculado > gases[j].stelMax) {
-            // indicadores.lectura_alta();
-            indicadores.alarma();
-          }
-          
+          gases[i].picoRegistrado = gases[i].newGasData;
         }
-        // Actualiza el índice 
-        stelIndex = (stelIndex + 1) % maxStelMeasurements; // Índice circular
+        // Comprobación de límites
+        if (gases[i].picoRegistrado > gases[i].picoMax) // Si supera el límite
+        {
+          // ALARMA
+          // Imprimir en pantalla el gas que supera
+        }
       }
-      
     }
-        
     if (buttonPressed == true) // Se presionó el botón 
     {
       // pantalla.displayLecturas(gases[0].newGasData, gases[1].newGasData, gases[2].newGasData); // Mostrar las lecturas
@@ -150,9 +108,8 @@ void loop() {
       pantalla.displayLecturas(gases[0].stelCalculado, gases[1].stelCalculado, gases[2].stelCalculado);
       buttonPressed = false;
     }
-  }     
+  }
 }
-
 
 float GasData() {
   // Simulación de una función que devuelve un valor de gas medido
