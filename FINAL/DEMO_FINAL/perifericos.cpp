@@ -272,13 +272,8 @@ void OLED::displayPicos(float picoCO, float picoNO2)
   display.print(F("NO2: "));
   display.print(picoNO2);
   display.println(F(" ppm"));
-  /*
-  display.print(F("O2: "));
-  display.print(picoO2);
-  display.println(F(" %"));
   display.display();
   delay(DISPLAY_DELAY);
-  */
   display.clearDisplay();
   display.display();
 }
