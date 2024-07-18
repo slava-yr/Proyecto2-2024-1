@@ -263,9 +263,8 @@ void OLED::displayLecturas(float measurementCO, float measurementNO2)
 void OLED::displayPicos(float picoCO, float picoNO2) 
 {
   display.setCursor(0, 0);
-  display.setTextSize(3);
-  display.println(F("Valores pico:\n"));
   display.setTextSize(2);
+  display.println(F("Valores pico:"));
   display.print(F("CO: "));
   display.print(picoCO);
   display.println(F(" ppm"));

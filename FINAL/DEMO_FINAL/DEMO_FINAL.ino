@@ -104,7 +104,8 @@ void loop() {
         if (gases[i].picoRegistrado > gases[i].picoMax) // Si supera el límite
         {
           // ALARMA
-          indicadores.alarma();
+          // indicadores.alarma();
+          gases[i].picoRegistrado = 0; // Restablece el picoRegistrado
           // Imprimir en pantalla el gas que supera
         }
       }
