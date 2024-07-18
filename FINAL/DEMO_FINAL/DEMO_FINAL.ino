@@ -4,7 +4,7 @@ DEMO FINAL PARA LA PRESENTACIÓN
 - Interrupción por botón
 - Imprimir "mediciones" actuales
 - Alarma cuando se superen los valores pico (ACTUALIZARLOS)
-
+- Alarma auditiva, vibratoria y luminosa
 -----------------------------------------*/
 #include "perifericos.h"
 
@@ -63,11 +63,12 @@ void setup() {
   pantalla.begin(); // Inicia la pantalla (imprime logo PUCP y subterrasafe)
 }
 
+uint8_t i;
 void loop() {
-  char selected_mode = pantalla.selectMode();
+  char selected_mode = pantalla.selectMode(); // Selecciona modo de operación
   pantalla.calentandoScreen(); // Dos veces
   
-  uint8_t stelIndex = 0; // Índice circular para STEL
+  // uint8_t stelIndex = 0; // Índice circular para STEL
   unsigned long int lastMeasurementTime = 0;
   
   // Gases en este orden: CO, NO2, O2
@@ -77,7 +78,7 @@ void loop() {
     Gas(20.0)    // O2
   };
 
-  attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING);
+  attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING); // Interrupciones por pulsador
   while(1)
   {
     unsigned long int currentTime = millis();
@@ -86,35 +87,40 @@ void loop() {
       
       lastMeasurementTime = currentTime; // Actualiza el tiempo 
 
+
+      gases[0].newGasData = GasData(10, 200); // CO;
+      gases[1].newGasData = GasData(1, 5); // NO2
+      gases[2].newGasData = GasData(10, 22); // O2  
+      
       for (i = 0; i < NUM_GASES; i++)
       {
-        gases[i].newGasData = GasData(); // Genera un nuevo dato
-        if (gases[i].newGasData > gases[j].picoRegistrado) // Actualiza el valor pico
+        // Actualizar valores pico
+        if (gases[i].newGasData > gases[i].picoRegistrado)
         {
           gases[i].picoRegistrado = gases[i].newGasData;
         }
+
         // Comprobación de límites
         if (gases[i].picoRegistrado > gases[i].picoMax) // Si supera el límite
         {
           // ALARMA
+          indicadores.alarma();
           // Imprimir en pantalla el gas que supera
         }
       }
     }
     if (buttonPressed == true) // Se presionó el botón 
     {
-      // pantalla.displayLecturas(gases[0].newGasData, gases[1].newGasData, gases[2].newGasData); // Mostrar las lecturas
-      // Display STEL
-      pantalla.displayLecturas(gases[0].stelCalculado, gases[1].stelCalculado, gases[2].stelCalculado);
+      pantalla.displayLecturas(gases[0].newGasData, gases[1].newGasData, gases[2].newGasData); // Mostrar las lecturas
+      // Mostrar valores pico
+      pantalla.displayPicos(gases[0].picoRegistrado, gases[1].picoRegistrado, gases[2].picoRegistrado);
       buttonPressed = false;
     }
   }
 }
 
-float GasData() {
-  // Simulación de una función que devuelve un valor de gas medido
-  // En un caso real, esta función obtendría datos del sensor
-  return random(10, 50); // Devuelve un valor aleatorio entre 10 y 50 ppm
+float GasData(uint8_t min, uint8_t max) {
+  return random(min*10, max*10)/10.0; // Devuelve un valor aleatorio entre 10 y 50 ppm
 }
 
 void onButtonPress()

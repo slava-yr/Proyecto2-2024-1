@@ -17,7 +17,7 @@
 #define DELTAY 2
 Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define STARTUP_DELAY 500 // Time for the startup screens
-#define DISPLAY_DELAY 5000 // Time for each measurement
+#define DISPLAY_DELAY 4000 // Time for each measurement
 
 
 // Para los leds
@@ -194,17 +194,6 @@ void OLED::begin() // First time
   display.clearDisplay();
 }
 
-/*
-void OLED::wakeUp() // Inicializa tras estar apagado
-{
-  digitalWrite(_enableOLED, HIGH);
-  delay(STARTUP_DELAY/2); // wait for the OLED to power up
-  display.begin(i2c_Address, true); // Address 0x3C default
-  display.clearDisplay(); 
-  display.setTextColor(SH110X_WHITE);
-}
-*/
-
 void OLED::displayO2(float measurement)
 {
   display.setTextSize(2);
@@ -269,6 +258,29 @@ void OLED::displayLecturas(float measurementCO, float measurementNO2, float meas
   displayNO2(measurementNO2);
   displayO2(measurementO2); 
 }
+
+// Muestra los 3 valores pico en una sola pantalla
+void OLED::displayPicos(float picoCO, float picoNO2, float picoO2) 
+{
+  display.setCursor(0, 0);
+  display.setTextSize(3);
+  display.println(F("Valores pico:\n"));
+  display.setTextSize(2);
+  display.print(F("CO: "));
+  display.print(picoCO);
+  display.println(F(" ppm"));
+  display.print(F("NO2: "));
+  display.print(picoNO2);
+  display.println(F(" ppm"));
+  display.print(F("O2: "));
+  display.print(picoO2);
+  display.println(F(" %"));
+  display.display();
+  delay(DISPLAY_DELAY);
+  display.clearDisplay();
+  display.display();
+}
+
 
 char OLED::selectMode() // Selecciona el modo: TWA o STEL
 {
@@ -415,11 +427,11 @@ void indicadores::alarma() {
       pixels.setPixelColor(i, pixels.Color(255,0,0));
     }
     pixels.show();
-    delay(300);
+    delay(400);
     for(int i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i,pixels.Color(0,0,0));
     }
     pixels.show();
-    delay(300);
+    delay(400);
   }
 }
