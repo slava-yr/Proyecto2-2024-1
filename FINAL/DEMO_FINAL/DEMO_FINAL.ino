@@ -88,8 +88,8 @@ void loop() {
       lastMeasurementTime = currentTime; // Actualiza el tiempo 
 
 
-      gases[0].newGasData = GasData(10, 300); // CO;
-      gases[1].newGasData = GasData(1, 8); // NO2
+      gases[0].newGasData = GasData(100, 300); // CO;
+      gases[1].newGasData = GasData(2, 8); // NO2
       // gases[2].newGasData = GasData(10, 22); // O2  
       
       for (i = 0; i < NUM_GASES; i++)
