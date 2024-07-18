@@ -40,7 +40,7 @@ const float VRefer = 3.3;       // Voltaje de referencia del ADC
 
 const float Rl_CO = 10;           // Resistencia de carga en kOhms (820 Ω del datasheet)
 const float Rl_NO2 = 0.82;           // Resistencia de carga en kOhms (820 Ω del datasheet)
-const float CO_Rs0 = 800.0;      // Resistencia típica del sensor en aire limpio para CO (valor del datasheet)
+const float CO_Rs0 = 200.0;      // Resistencia típica del sensor en aire limpio para CO (valor del datasheet)
 const float NO2_Rs0 = 20.0;      // Resistencia típica del sensor en aire limpio para NO2 (valor del datasheet)
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
@@ -92,13 +92,12 @@ void loop() {
       // Tomar lecturas  
       CO = getCOPPM();
       NO2 = getNO2PPM();
-      //O2 = GasData();
-      O2 = 22.00;      
+      O2 = GasData();     
 
     }
     if (buttonPressed == true) // Si se presiona el botón
     {
-      if (O2 >= 19.5){
+      if (O2 <= 19.5){
           for (int j = 0; j < 10; j++) {
             for(int i = 0; i < NUMLEDS; i++) {
               leds.setPixelColor(i, leds.Color(255, 0, 0));
@@ -191,7 +190,7 @@ void loop() {
 }
 
 float GasData() {
-  return random(15, 19); // Devuelve un valor aleatorio entre 10 y 50 ppm
+  return random(20, 28); // Devuelve un valor aleatorio entre 10 y 50 ppm
 }
 
 void onButtonPress() { // Cuando se presiona el botón
