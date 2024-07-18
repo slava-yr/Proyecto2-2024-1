@@ -1,4 +1,5 @@
 //versión con lectura de sensores
+#include <Wire.h>
 #include <Adafruit_NeoPixel.h>
 // #include <avr/power.h>
 #include "perifericos.h"
@@ -29,6 +30,10 @@
 #define NUM_GASES 3 // Solo para debugear, quitar después
 #define measurementInterval 3000 // 120000 // 2 minutos en ms
 
+#define NUMLEDS 5
+#define COLOR_LED 3 // Pin pwm para el color de los leds
+Adafruit_NeoPixel leds = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
+
 const float Vcc = 5.0;           // Voltaje de suministro
 const float Vadc_max = 1023.0;   // Valor máximo del ADC (ADC de 10 bits)
 const float VRefer = 3.3;       // Voltaje de referencia del ADC
@@ -50,16 +55,21 @@ void setup() {
   pinMode(EN_CO, OUTPUT);
   pinMode(EN_NO2, OUTPUT);
   pinMode(ON_OFF_SENSORES, OUTPUT);
+  pinMode(ON_OFF_BUZZER, OUTPUT);
+  /*pinMode(ON_OFF_LED, OUTPUT);
+  pinMode(ON_OFF_VIB, OUTPUT); */
+  indicadores.begin();
+
 
   // Alimentar sensores para calentar
   digitalWrite(ON_OFF_SENSORES, HIGH);
   digitalWrite(EN_CO, LOW);
   digitalWrite(EN_NO2, LOW);
 
-  indicadores.begin();
-  digitalWrite(ON_OFF_BUZZER, HIGH);
-  digitalWrite(ON_OFF_LED, HIGH);
-  digitalWrite(ON_OFF_VIB, HIGH);
+  
+  //digitalWrite(ON_OFF_BUZZER, HIGH);
+  //digitalWrite(ON_OFF_LED, HIGH);
+  //digitalWrite(ON_OFF_VIB, HIGH);
   indicadores.patron_inicio();
   pantalla.begin();
 }
@@ -82,19 +92,106 @@ void loop() {
       // Tomar lecturas  
       CO = getCOPPM();
       NO2 = getNO2PPM();
-      O2 = GasData();      
+      //O2 = GasData();
+      O2 = 22.00;      
 
     }
     if (buttonPressed == true) // Si se presiona el botón
     {
+      if (O2 >= 19.5){
+          for (int j = 0; j < 10; j++) {
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(255, 0, 0));
+            }
+            leds.show();
+            //indicadores.buzz_on();
+            //-digitalWrite(ON_OFF_BUZZER, HIGH);
+            pantalla.alertaO2(O2);
+            delay(200);
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 255));
+            }
+            leds.show();
+            //indicadores.buzz_off();
+            //digitalWrite(ON_OFF_BUZZER, LOW);
+            pantalla.alertaO2(O2);
+            delay(200);
+          }
+          for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 0));
+          }
+          leds.show();
+          delay(200);
+      } 
+
+      if (CO >= 25){
+          for (int j = 0; j < 10; j++) {
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(255, 0, 0));
+            }
+            leds.show();
+            pantalla.alertaCO(CO);
+            /* pinMode(ON_OFF_BUZZER, OUTPUT);
+            digitalWrite(ON_OFF_BUZZER, HIGH); */
+            delay(200);
+
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 255));
+            }
+            leds.show();
+            pantalla.alertaCO(CO);
+            /* pinMode(ON_OFF_BUZZER, OUTPUT);
+            digitalWrite(ON_OFF_BUZZER, LOW); */
+            delay(200);
+          }
+          for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 0));
+          }
+          leds.show();
+          delay(200);
+      } 
+
+      if (NO2 >= 5){
+          for (int j = 0; j < 10; j++) {
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(255, 0, 0));
+            }
+            leds.show();
+            pantalla.alertaNO2(NO2);
+            /* pinMode(ON_OFF_BUZZER, OUTPUT);
+            digitalWrite(ON_OFF_BUZZER, HIGH); */
+            delay(200);
+
+            for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 255));
+            }
+            leds.show();
+            pantalla.alertaNO2(NO2);
+            /* pinMode(ON_OFF_BUZZER, OUTPUT);
+            digitalWrite(ON_OFF_BUZZER, LOW); */
+            delay(200);
+          }
+          for(int i = 0; i < NUMLEDS; i++) {
+              leds.setPixelColor(i, leds.Color(0, 0, 0));
+          }
+          leds.show();
+          delay(200);
+      } 
+      /* if (CO >= 25){
+        indicadores.lectura_alta();
+      }
+      if (NO2 >= 5){
+        indicadores.lectura_alta();
+      } */
       pantalla.displayLecturas(O2, CO, NO2); // Mostrar las lecturas
+       
       buttonPressed = false;
     }
   }
 }
 
 float GasData() {
-  return random(10, 50); // Devuelve un valor aleatorio entre 10 y 50 ppm
+  return random(15, 19); // Devuelve un valor aleatorio entre 10 y 50 ppm
 }
 
 void onButtonPress() { // Cuando se presiona el botón

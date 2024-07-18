@@ -29,6 +29,9 @@ class OLED
     void displayO2(float measurement);
     void displayCO(float measurement);
     void displayNO2(float measurement);
+    void alertaO2(float measurement);
+    void alertaCO(float measurement);
+    void alertaNO2(float measurement);
 
     void calentandoScreen(); // Calentamiento de sensores
 
@@ -53,6 +56,8 @@ class indicadores
     void lectura_alta();
     void lectura_moderada();
     void lectura_normal();
+    void buzz_on();
+    void buzz_off();
 
   private:
     uint8_t _enableLeds;

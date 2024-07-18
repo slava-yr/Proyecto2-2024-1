@@ -2,7 +2,7 @@
 #include "perifericos.h"
 
 #include <Wire.h>
-#include <Adafruit_GFX.h>
+//#include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 #include <Adafruit_NeoPixel.h>
 
@@ -21,9 +21,10 @@ Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 
 
 
 // Para los leds
-#define NUMLEDS 7
+#define NUMLEDS 5
 #define COLOR_LED 3 // Pin pwm para el color de los leds
 #define LEDS_DELAY 100
+
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLEDS, COLOR_LED, NEO_GRB + NEO_KHZ800);
 
 // Calentamiento de sensores
@@ -245,6 +246,53 @@ void OLED::displayNO2(float measurement)
   display.display();
 }
 
+void OLED::alertaO2(float measurement)
+{
+  display.setCursor(5, 8);
+  display.setTextSize(2.5);
+  display.println(F("ALERTA O2!\n"));
+  display.setTextSize(2.5); 
+  display.print(measurement);
+  display.setTextSize(2);
+  display.println(F(" %"));
+  display.display();
+  delay(200);
+  display.clearDisplay();
+  display.display();
+}
+
+void OLED::alertaCO(float measurement)
+{
+  display.setCursor(5, 8);
+  display.setTextSize(2.5);
+  display.println(F("ALERTA CO!\n"));
+  display.setTextSize(2.5); 
+  display.print(measurement);
+  display.setTextSize(2);
+  display.println(F(" ppm"));
+  display.display();
+  delay(200);
+  display.clearDisplay();
+  display.display();
+}
+
+void OLED::alertaNO2(float measurement)
+{
+  display.setCursor(5, 8);
+  display.setTextSize(2.5);
+  display.println(F("ALERTA NO2!\n"));
+  display.setTextSize(2.5); 
+  display.print(measurement);
+  display.setTextSize(2);
+  display.println(F(" ppm"));
+  display.display();
+  delay(200);
+  display.clearDisplay();
+  display.display();
+}
+
+
+
 void OLED::calentandoScreen() // Aprox 9 segundos
 {
   long unsigned int startTime = millis();
@@ -321,25 +369,22 @@ char OLED::selectMode() // Selecciona el modo: TWA o STEL
       holdTime = 0;
     }
 
-    if (holdTime > 1200) // Confirmar opción
+    if (holdTime > 1000) // Confirmar opción
     {
       finalMode = lastMode;
       // Pantalla de modo seleccionado
       display.clearDisplay();
-      display.setCursor(0, 0);
-      display.setTextSize(5);  
+      display.setCursor(20, 15);
+      display.setTextSize(3);  
 
-      Serial.println(F("Seleccionó "));
       if (finalMode == 'T')
       {
-        display.println(F("TWA"));
+        display.println(F("LISTO"));
       }
       else
       {
-        display.println(F("STEL"));
+        display.println(F("LISTO"));
       }
-      display.setTextSize(1);
-      display.print(F("\nSeleccionado"));
       display.display();
       delay(1000);
       return finalMode;
@@ -354,17 +399,17 @@ char OLED::updateDisplay(char lastMode)
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.println(F("Seleccione el modo de medicion: \n"));
-  display.setTextSize(5);  
+  display.println(F("Pulse el boton para: \n"));
+  display.setTextSize(4);  
   
   if (lastMode == 'T') // TWA
   { 
-    display.println(F("STEL")); 
+    display.println(F("MEDIR")); 
     newMode = 'S'; // STEL
   }
   else if (lastMode == 'S')
   {
-    display.println(F("TWA")); 
+    display.println(F("MEDIR")); 
     newMode = 'T'; // TWA
   } 
 
@@ -388,37 +433,26 @@ void indicadores::begin()
   pinMode(_enableLeds, OUTPUT);
   pinMode(_enableVibrador, OUTPUT);
   pinMode(_enableBuzzer, OUTPUT);
+
   digitalWrite(_enableBuzzer, HIGH);
   delay(400);
-  digitalWrite(_enableBuzzer, LOW);
-}
-
-  //controla la intensidad de cada color ingresado(0-100%)y devuelve el comando pixels con la intensidad adecuada
-uint32_t indicadores::color_intensity(uint32_t color, uint8_t scale) {
-  uint8_t r = (color >> 16) & 0xFF;
-  uint8_t g = (color >> 8) & 0xFF;
-  uint8_t b = color & 0xFF;
-  r = (r * scale) / 100;
-  g = (g * scale) / 100;
-  b = (b * scale) / 100;
-  return pixels.Color(r, g, b);
+  digitalWrite(_enableBuzzer, LOW); 
 }
 
 //patrón de luces de inicio del dispositivo
 //enciende y apaga atenuando los colores del arreglo colors[]
 void indicadores::patron_inicio() {
   digitalWrite(_enableLeds, HIGH);
-  uint32_t colors[] = {pixels.Color(0, 0, 255), pixels.Color(0, 255, 0), pixels.Color(255, 0, 0)};
+  uint32_t colors[] = {pixels.Color(255, 255, 0), pixels.Color(128, 0, 128), pixels.Color(64, 224, 208)};
   int numColors = sizeof(colors) / sizeof(colors[0]);
 
   for(int j = 0; j < numColors; j++) {
-    for(int brightness = 0; brightness <= 100; brightness++) {
       for(int i = 0; i < NUMLEDS; i++) {
-        pixels.setPixelColor(i, color_intensity(colors[j], brightness));
+        pixels.setPixelColor(i, colors[j]);
       }
       pixels.show();
-      delay(8);
-    }
+      delay(500);
+    
 
     if (j == 0){
       digitalWrite(_enableBuzzer, HIGH);
@@ -429,34 +463,31 @@ void indicadores::patron_inicio() {
     delay(300);
     digitalWrite(_enableBuzzer, LOW);
     digitalWrite(_enableVibrador, LOW);
-
-    /*(int brightness = 100; brightness >= 0; brightness--) {
-      for(int i = 0; i < NUMLEDS; i++) {
-        pixels.setPixelColor(i, color_intensity(colors[j], brightness));
-      }
-      //digitalWrite(ON_OFF_VIB, LOW);
-      pixels.show();
-      delay(8);
-    }*/
   }
 
-  for(int brightness = 100; brightness >= 0; brightness--) {
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, pixels.Color(brightness*255/100, brightness*255/100, brightness*255/100));
+      pixels.setPixelColor(i, pixels.Color(0,0,0));
     }
     pixels.show();
-    delay(8);
-  }
   
   delay(500);
 }
 
+void indicadores::buzz_on() {
+  digitalWrite(_enableBuzzer, HIGH);
+  delay(500);
+}
+
+void indicadores::buzz_off() {
+  digitalWrite(_enableBuzzer, LOW);
+  delay(500);
+}
 
 
 void indicadores::lectura_alta() {
-  for (int i = 0; i < 10; i++) {
+  for (int j = 0; j < 10; j++) {
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 0, 0), 90));
+      pixels.setPixelColor(i, pixels.Color(255, 0, 0));
     }
     pixels.show();
     digitalWrite(_enableVibrador, HIGH);
@@ -464,7 +495,7 @@ void indicadores::lectura_alta() {
     delay(200);
 
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 255), 90));
+      pixels.setPixelColor(i, pixels.Color(0, 0, 255));
     }
     pixels.show();
     digitalWrite(_enableVibrador, LOW);
@@ -480,7 +511,7 @@ void indicadores::lectura_alta() {
 void indicadores::lectura_moderada() {
   for (int i = 0; i < 10; i++) {
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(255, 191, 0), 90));
+      pixels.setPixelColor(i, pixels.Color(255, 191, 0));
     }
     pixels.show();
     digitalWrite(_enableVibrador, HIGH);
@@ -488,7 +519,7 @@ void indicadores::lectura_moderada() {
     delay(300);
 
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
     }
     pixels.show();
     digitalWrite(_enableVibrador, LOW);
@@ -504,7 +535,7 @@ void indicadores::lectura_moderada() {
 void indicadores::lectura_normal() {
   for (int i = 0; i < 3; i++) {
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 255, 0), 90));
+      pixels.setPixelColor(i, pixels.Color(0, 255, 0));
     }
     pixels.show();
     digitalWrite(_enableVibrador, HIGH);
@@ -512,7 +543,7 @@ void indicadores::lectura_normal() {
     delay(500);
 
     for(int i = 0; i < NUMLEDS; i++) {
-      pixels.setPixelColor(i, color_intensity(pixels.Color(0, 0, 0), 90));
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
     }
     pixels.show();
     digitalWrite(_enableVibrador, LOW);
