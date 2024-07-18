@@ -28,7 +28,7 @@ DEMO FINAL PARA LA PRESENTACIÓN
 #define O2_OUT  A2  // Pin de lectura de valor de sensor O2
 
 #define measurementInterval 6000 // 120000 // 2 minutos en ms
-#define NUM_GASES 3 // Solo para debugear, quitar después
+#define NUM_GASES 2 // Solo para debugear, quitar después
 
 OLED pantalla(ON_OFF_PANTALLA, INT0); // Crea un oled_display
 indicadores indicadores(ON_OFF_LED, ON_OFF_VIB, ON_OFF_BUZZER); // Crea los indicadores
@@ -75,7 +75,7 @@ void loop() {
   Gas gases[NUM_GASES] = {
     Gas(200.0),   // CO
     Gas(5.0),   // NO2
-    Gas(20.0)    // O2
+    // Gas(20.0)    // O2
   };
 
   attachInterrupt(digitalPinToInterrupt(INT0), onButtonPress, RISING); // Interrupciones por pulsador
@@ -90,7 +90,7 @@ void loop() {
 
       gases[0].newGasData = GasData(10, 200); // CO;
       gases[1].newGasData = GasData(1, 5); // NO2
-      gases[2].newGasData = GasData(10, 22); // O2  
+      // gases[2].newGasData = GasData(10, 22); // O2  
       
       for (i = 0; i < NUM_GASES; i++)
       {
@@ -111,9 +111,9 @@ void loop() {
     }
     if (buttonPressed == true) // Se presionó el botón 
     {
-      pantalla.displayLecturas(gases[0].newGasData, gases[1].newGasData, gases[2].newGasData); // Mostrar las lecturas
+      pantalla.displayLecturas(gases[0].newGasData, gases[1].newGasData); // Mostrar las lecturas
       // Mostrar valores pico
-      pantalla.displayPicos(gases[0].picoRegistrado, gases[1].picoRegistrado, gases[2].picoRegistrado);
+      pantalla.displayPicos(gases[0].picoRegistrado, gases[1].picoRegistrado);
       buttonPressed = false;
     }
   }

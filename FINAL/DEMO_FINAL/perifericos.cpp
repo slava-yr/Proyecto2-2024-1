@@ -251,16 +251,16 @@ void OLED::calentandoScreen() // Aprox 9 segundos
   } 
 }
 
-void OLED::displayLecturas(float measurementCO, float measurementNO2, float measurementO2)
+void OLED::displayLecturas(float measurementCO, float measurementNO2)
 {
   display.clearDisplay();
   displayCO(measurementCO);
   displayNO2(measurementNO2);
-  displayO2(measurementO2); 
+  // displayO2(measurementO2); 
 }
 
 // Muestra los 3 valores pico en una sola pantalla
-void OLED::displayPicos(float picoCO, float picoNO2, float picoO2) 
+void OLED::displayPicos(float picoCO, float picoNO2) 
 {
   display.setCursor(0, 0);
   display.setTextSize(3);
@@ -272,11 +272,13 @@ void OLED::displayPicos(float picoCO, float picoNO2, float picoO2)
   display.print(F("NO2: "));
   display.print(picoNO2);
   display.println(F(" ppm"));
+  /*
   display.print(F("O2: "));
   display.print(picoO2);
   display.println(F(" %"));
   display.display();
   delay(DISPLAY_DELAY);
+  */
   display.clearDisplay();
   display.display();
 }
@@ -366,6 +368,25 @@ char OLED::updateDisplay(char lastMode)
   delay(600);
   return newMode;
 }
+
+/*
+void OLED::alarma(uint8_t gas)
+{
+
+  if (gas == 0)
+  {
+
+  }
+  else if (gas == 1)
+  {
+
+  }
+  else
+  {
+
+  }
+}
+*/
 /* **********************************************************
  **********CÓDIGO DE LOS INDICADORES*************************
  ************************************************************/
@@ -423,15 +444,19 @@ void indicadores::patron_inicio() {
 void indicadores::alarma() {
   for (uint8_t j = 0; j < 10; j++) // Repite 10 veces
   {
-    for(int i = 0; i < NUMLEDS; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i, pixels.Color(255,0,0));
     }
     pixels.show();
+    digitalWrite(_enableBuzzer, HIGH);
+    digitalWrite(_enableVibrador, HIGH);
     delay(400);
-    for(int i = 0; i < NUMLEDS; i++) {
+    for(uint8_t i = 0; i < NUMLEDS; i++) {
       pixels.setPixelColor(i,pixels.Color(0,0,0));
     }
     pixels.show();
+    digitalWrite(_enableBuzzer, LOW);
+    digitalWrite(_enableVibrador, LOW);
     delay(400);
   }
 }

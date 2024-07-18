@@ -32,8 +32,8 @@ class OLED
 
     void calentandoScreen(); // Calentamiento de sensores
 
-    void displayLecturas(float measurementO2, float measurementCO, float measurementNO2);
-    void displayPicos(float picoCO, float picoNO2, float picoO2);
+    void displayLecturas(float measurementCO, float measurementNO2);
+    void displayPicos(float picoCO, float picoNO2);
     char updateDisplay(char lastMode);
     char selectMode();
     
